@@ -1,0 +1,4074 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <style>
+      .todo {
+        display: flex;
+        flex-direction: column;
+        background: #EEE;
+        padding: 24px;
+        box-sizing: boder-box;
+      }
+    </style>
+    <h1></h1>
+    <h2>TODO's</h2>
+    
+<h3>C:\Workspace\leofcoin-core\src\api.js</h3>
+
+  <span class="todo">
+  <h4>add donationAddress</h4>
+  <br>
+  <p><strong>line</strong>4135</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>add donation option in ui</h4>
+  <br>
+  <p><strong>line</strong>4166</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>whenever a address is used update depth...
+</h4><p> IOW</p>
+  <br>
+  <p><strong>line</strong>5312</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>allow account by name (even when there aren't any transactions...)</h4>
+  <br>
+  <p><strong>line</strong>6053</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>implement multi-script-service</h4>
+  <br>
+  <p><strong>line</strong>6487</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>validate transaction</h4>
+  <br>
+  <p><strong>line</strong>6557</p>
+  <code></code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin-core\src\core.js</h3>
+
+  <span class="todo">
+  <h4>flags should be configurable @ start</h4>
+  <br>
+  <p><strong>line</strong>1097</p>
+  <code>import { getUserConfig, debug, allowFailureUntillEnough, log, groupCollapsed } from './utils';
+import bus from './lib/bus';
+import { join } from 'path';
+import { configPath, networkPath, network, genesis, netPrefix } from './params';
+import ipfsdNode from './../../ipfsd-node/src/node';
+import { write } from 'crypto-io-fs';
+import ipfsStar from './lib/network/ipfs-star';
+import { connect, connectBootstrap } from './lib/network/peernet';
+import { DAGChain } from './lib/dagchain/dagchain.js';
+import Room from './lib/network/room.js';
+
+global.states = {
+  ready: false,
+  syncing: false,
+  connecting: false,
+  mining: false
+};
+
+export const core = async () => {
+	try {
+    const now = Date.now();
+    const config = await getUserConfig;
+    bus.emit('stage-one');
+    const ipfsd = await ipfsdNode({
+      bootstrap: network,
+      network: network,
+      sharding: true,
+      relayHop: true,
+      flags: ['--enable-namesys-pubsub', '--enable-pubsub-experiment'],
+      repoPath: networkPath,
+      cleanup: false
+    });
+    console.log('starting ipfs');
+    // TODO: flags should be configurable @ start
+    const { ipfs, addresses, id } = await ipfsd.start();
+    global.id = id;
+    global.ipfs = ipfs;
+    const ipfsd_now = Date.now();
+    await connectBootstrap();
+
+    const bootstrap_now = Date.now();
+    new Room(ipfs, `${netPrefix}-signal`);
+    // const star = await ipfsStar(addresses[0], ipfs.pubsub);
+    const signal_now = Date.now();
+    // const server = await import('./server/index.js');
+    process.on('SIGINT', async () => {
+      console.log("Caught interrupt signal");
+      // await star.stop();
+      await ipfsd.stop();
+      setTimeout(async () => {
+        process.exit();
+      }, 50);
+      //graceful shutdown
+    });
+    await connect();
+    const connection_now = Date.now();
+    bus.emit('stage-two');
+    groupCollapsed('Initialize', () => {
+      log(`ipfs daemon startup took: ${(ipfsd_now - now) / 1000} seconds`);
+      log(`connecting with bootstrap took: ${(bootstrap_now - ipfsd_now) / 1000} seconds`);
+      log(`signal server startup took: ${(signal_now - bootstrap_now) / 1000} seconds`);
+      log(`peer connection took: ${(connection_now - ipfsd_now) / 1000} seconds`);
+      log(`total load prep took ${(Date.now() - now) / 1000} seconds`);
+    })
+    await write(configPath, JSON.stringify(config, null, '\t'));
+    const chain = new DAGChain({ genesis: true, network, ipfs });
+    await chain.init();
+    return chain;
+	} catch (e) {
+    if (e.code === 'ECONNREFUSED' || e.message && e.message.includes('cannot acquire lock')) {
+      // await cleanRepo();
+      console.log('retrying');
+      // return core({ genesis, network });
+    }
+		console.error(`load-error::${e}`);
+    // process.exit()
+	}
+}
+</code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin-core\src\lib\bus.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin-core\src\params.js</h3>
+
+  <span class="todo">
+  <h4>implement darwin path</h4>
+  <br>
+  <p><strong>line</strong>1500</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>implement android path</h4>
+  <br>
+  <p><strong>line</strong>1573</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>remove seed once we have a static ip for our ipfs daemon node</h4>
+  <br>
+  <p><strong>line</strong>3115</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>make AppData overwriteable</h4>
+  <br>
+  <p><strong>line</strong>3251</p>
+  <code></code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin-core\src\lib\transaction.js</h3>
+
+  <span class="todo">
+  <h4>versions should be handled here...</h4>
+  <br>
+  <p><strong>line</strong>931</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>show notification the tx got signed</h4>
+  <br>
+  <p><strong>line</strong>4207</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>Add multiSigning</h4>
+  <br>
+  <p><strong>line</strong>4890</p>
+  <code></code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin-core\src\lib\dagchain\dagchain-interface.js</h3>
+
+  <span class="todo">
+  <h4>needs 3 nodes running</h4>
+  <br>
+  <p><strong>line</strong>780</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>push to pubus</h4>
+  <br>
+  <p><strong>line</strong>1485</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>lower difficulty when transactionpool contain more then 500 tx ?</h4>
+  <br>
+  <p><strong>line</strong>3345</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>raise difficulty when pool is empty</h4>
+  <br>
+  <p><strong>line</strong>3421</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>implement iTX (instant transaction)</h4>
+  <br>
+  <p><strong>line</strong>3478</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>global peerlist</h4>
+  <br>
+  <p><strong>line</strong>4729</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>update reputation here</h4>
+  <br>
+  <p><strong>line</strong>5461</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>consider using canditates for validating</h4>
+  <br>
+  <p><strong>line</strong>5585</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>syncChain if needed</h4>
+  <br>
+  <p><strong>line</strong>6129</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>await lastBlock</h4>
+  <br>
+  <p><strong>line</strong>6473</p>
+  <code></code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin-core\src\lib\wallet-utils.js</h3>
+
+  <span class="todo">
+  <h4>encrypt</h4>
+  <br>
+  <p><strong>line</strong>157</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>encrypt the wallet</h4>
+  <br>
+  <p><strong>line</strong>610</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>update network param, support <net> & <net>:<purpose> scheme</h4>
+  <br>
+  <p><strong>line</strong>640</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>update network param, support <net> & <net>:<purpose> scheme</h4>
+  <br>
+  <p><strong>line</strong>640</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>https:</h4><p>github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#Account_discovery @AndrewVanardennen @vandeurenglenn</p>
+  <br>
+  <p><strong>line</strong>4121</p>
+  <code></code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin-core\src\lib\miner.js</h3>
+
+  <span class="todo">
+  <h4>limit intensity when pool is empty</h4>
+  <br>
+  <p><strong>line</strong>632</p>
+  <code>import { config, hashLog, median } from './../utils';
+import getDifficulty from '../difficulty';
+import { BlockError, TransactionError, MinerWarning } from './errors';
+import { StoreHandler } from 'crypto-store';
+import { nextBlock, difficulty } from './dagchain/dagchain-interface';
+import bus from './bus';
+import { fork } from 'child_process';
+import { join } from 'path';
+
+export default class Miner extends StoreHandler {
+
+  get donationAddress() {
+    return 'cpc';
+  }
+
+  set job(value) {
+    this._job = value;
+  }
+
+  get job() {
+    return this._job;
+  }
+
+  constructor(address, intensity, autostart) {
+    // TODO: limit intensity when pool is empty
+    super();
+    this.workerPath = join(__dirname, 'miner-worker.js')
+    if (!address) {
+      MinerWarning('All profit will be donated until address is set');
+    }
+    this.address = address;
+    this.running = 0;
+
+
+    if (autostart) {
+      this.start();
+    }
+  }
+
+  /**
+   * keep node(s) in sync
+   */
+  onBlockAdded() {
+    return new Promise((resolve, reject) => {
+      this._onBlockAdded = block => {
+        bus.removeListener('block-added', this._onBlockAdded);
+        bus.removeListener('invalid-block', this._onBlockInvalid);
+        this.mineStop()
+        resolve(block);
+      }
+      this._onBlockInvalid = block => {
+        bus.removeListener('block-added', this._onBlockAdded);
+        bus.removeListener('invalid-block', this._onBlockInvalid);
+        this.mineStop()
+        resolve(null);
+      }
+      bus.once('block-added', this._onBlockAdded);
+      bus.once('invalid-block', this._onBlockInvalid);
+    });
+  }
+
+
+  async start() {
+    // ipfs.pubsub.subscribe('invalid-block');
+    this.mining = true;
+    if (!this.job) this.job = Math.random().toString(36).slice(-11);
+    this.mine(this.job);
+  }
+
+  stop() {
+    this.mining = false;
+    this.mineStop();
+  }
+
+  async mine(job, lastValidBlock) {
+    const address = this.address || this.donationAddress;
+    const start = Date.now();
+    const {block, hashes, index} = await this.mineBlock(difficulty(), address, job);
+
+    if (hashes) {
+      const now = Date.now();
+      const seconds = (now - start) / 1000;
+      const rate = (hashes / seconds) / 1000;
+      bus.emit('miner.hashrate', {uid: job, hashrate: (Math.round(rate * 100) / 100)});
+    }
+
+    if (block) {
+      global.ipfs.pubsub.publish('block-added', Buffer.from(JSON.stringify(block)));
+      console.log(`${job}::Whooooop mined block ${block.index}`);
+      if (this.mining) {
+        await this.onBlockAdded();
+        this.mine(job, block);
+      }
+    } else {
+      console.log(`${job}::cancelled mining block ${index}`);
+      if (this.mining) this.mine(job);
+    }
+
+  }
+
+  /**
+   * Mine a block in separate process
+   *
+   * @param transactions Transactions list to add to the block
+   * @param lastBlock Last block in the blockchain
+   * @param difficulty Current difficulty
+   * @param address Addres for reward transaction
+   * @return {*}
+   */
+  async mineBlock(difficulty, address, job) {
+    const block = await nextBlock(address);
+    console.log(`${job}::Started mining block ${block.index}`);
+
+    return this.findBlockHash(block, difficulty);
+  }
+
+  /**
+   * Find block hash according to difficulty
+   *
+   * @param block
+   * @param difficulty
+   * @return {Promise}
+   */
+  findBlockHash (block, difficulty) {
+    return new Promise((resolve, reject) => {
+      const worker = fork(this.workerPath);
+      /*
+       * Create worker to find hash in separate process
+       */
+
+
+       /*
+        * Hadnle events to stop mining when needed
+        */
+      this.mineStop = () => {
+       removeListeners()
+       worker.kill('SIGINT')
+       resolve({block: null, hashCount: null, index: block.index});
+      }
+
+      // Listeners for stopping mining
+      const blockAddedListener = b => {
+        if (b.index >= block.index) this.mineStop()
+      }
+      const mineStopListener = b => this.mineStop
+      const removeListeners = () => {
+       bus.removeListener('block-added', blockAddedListener)
+       bus.removeListener('mine-stop', mineStopListener)
+      }
+      // If other process found the same block faster, kill current one
+      bus.once('block-added', blockAddedListener)
+      bus.once('mine-stop', mineStopListener)
+      // const result = await minerWorker({block, difficulty})
+      worker.on('message', (data) => {
+        removeListeners();
+
+        resolve({block: data.block, hashes: data.hashCount});
+        worker.kill('SIGINT');
+      })
+      worker.send({block, difficulty});
+
+    });
+  }
+
+}
+</code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin-core\src\utils.js</h3>
+
+  <span class="todo">
+  <h4>prompt for password</h4>
+  <br>
+  <p><strong>line</strong>3076</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>also check for configfile in the directory where core is run from @AndrewVanardennen</h4>
+  <br>
+  <p><strong>line</strong>3616</p>
+  <code></code>
+  </span>
+
+ 
+<h3>C:\Workspace\ipfsd-node\src\node.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin-core\src\lib\network\ipfs-star.js</h3>
+
+  <span class="todo">
+  <h4>rename to client</h4>
+  <br>
+  <p><strong>line</strong>76</p>
+  <code></code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin-core\src\lib\network\peernet.js</h3>
+
+  <span class="todo">
+  <h4>create bootstrap according peer reputation ...</h4>
+  <br>
+  <p><strong>line</strong>389</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>ignore address after 5 times</h4>
+  <br>
+  <p><strong>line</strong>2482</p>
+  <code></code>
+  </span>
+ 
+  <span class="todo">
+  <h4>filter using peerrep</h4>
+  <br>
+  <p><strong>line</strong>3334</p>
+  <code></code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin-core\src\lib\dagchain\dagchain.js</h3>
+
+  <span class="todo">
+  <h4>finishe the genesis module</h4>
+  <br>
+  <p><strong>line</strong>1543</p>
+  <code>export class DAGChain extends EventEmitter {
+  get link() {
+    return this.name.replace('/ipfs/', '')
+  }
+  get links() {
+    return this.node ? this.node.links : [];
+  }
+  get index() {
+    const links = [];
+    this.links.forEach(link => {
+
+      links[link.name] = link;
+    });
+    return links.length > 0 ? links : [];
+  }
+  constructor({genesis, ipfs}) {
+    super();
+    this.announceBlock = this.announceBlock.bind(this);
+
+    this.chain = chain;
+    this.ipfs = ipfs;
+  }
+
+  init() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.ipfs.pubsub.subscribe('block-added', this.announceBlock);
+        await this.ipfs.pubsub.subscribe('invalid-transaction', invalidTransaction);
+        log(`Running on the ${network} network`);
+        await this.loadChain();
+      } catch (error) {
+        // TODO: finishe the genesis module
+        if (genesis) {
+          log(`Creating genesis block on the ${network} network`);
+          await this.newDAGChain();
+        } else {
+          reject(error)
+        }
+      }
+    });
+  }
+  async resolve(name) {
+    return await this.ipfs.name.resolve(name, {recursive: true});
+  }
+
+  async get(multihash) {
+    const { value, remainderPath } = await this.ipfs.dag.get(multihash);
+    return value
+  }
+
+  async put(DAGNode) {
+    return await this.ipfs.object.put(DAGNode);
+  }
+
+  async pin(multihash) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.ipfs.pin.add(multihash, {recursive: true});
+        resolve();
+      } catch (e) {
+        reject(e)
+      }
+    });
+  }
+
+  /**
+   * addLink
+   */
+  async addLink(multihash, link) {
+    const newDAGChain = await this.ipfs.object.patch.addLink(multihash, link);
+    this.name = `/ipfs/${encode(newDAGChain.multihash)}`;
+    this.node = await this.get(this.link);
+    const published = await this.publish(encode(newDAGChain.multihash));
+    return published;
+  }
+
+  async lastLink() {
+    try {
+      await this.sync();
+      const height = Number(this.links.length) - 1;
+      for (const link of this.links) {
+        if (Number(link.name) === height) {
+          return link.multihash;
+        }
+      }
+    } catch (e) {
+      console.error('Sync Error::', e);
+    }
+  }
+
+  /**
+   * resolves to the latest chainObject
+   */
+  async sync() {
+    const { hash } = await longestChain();
+    this.name = hash || await localDAGMultiaddress();
+    this.node = await this.get(this.link);
+
+    log(`chain name: ${this.name}`);
+    log(`chain size: ${Math.round(Number(this.node.size) * 1e-6 * 100) / 100} Mb`);
+    return this.link;
+  }
+
+  async publish(multihash) {
+    const published = await this.ipfs.name.publish(multihash);
+    // if (this.name) {
+    //   await this.sync();
+    // }
+    await this.pin(published['value']);
+    return published['name']  // only needed when creating genesis block
+  }
+
+  async resolveBlocks(multihash, index) {
+    try {
+      const dagBlock = new DAGBlock(this.ipfs, encode(multihash));
+      const block = await dagBlock.get(encode(multihash));
+      // our hashes are prefixed by the 'sha2-256' code
+      // this results in hashes with 1220 at the start
+      // we remove the prefix by simply slicing the buffer
+      const hash = multihash.slice(2);
+      if (block.index > index) {
+        await this.pin(encode(multihash)); // pin block locally
+        console.log(`added block: ${block.index}  ${hash.toString('hex')}`);
+      }
+      // store them in memory
+      // global.blockHashSet[hash] = block.index;
+      block.hash = hash.toString('hex');
+      chain[block.index] = block;
+      // console.log(await dagBlock.getHeader(encode(multihash)));
+      debug(`loaded block: ${block.index}  ${hash.toString('hex')}`);
+      if (block.prevHash && block.prevHash.length > 3) {
+        return this.resolveBlocks(Buffer.from(`1220${block.prevHash}`, 'hex'), index);
+      }
+      return;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async syncChain() {
+    try {
+      global.states.syncing = true;
+      bus.emit('syncing', true);
+      if (this.index) {
+        const { index } = await this.localBlock();
+        const sync = await this.sync()
+        const height = this.index.length - 1;
+        const multihash = this.index[height].cid.multihash;
+        let syncCount = height - index;
+        debug(`local chain height: ${index}`);
+        debug(`network chain height: ${height}`);
+        debug(`syncing ${syncCount} block(s)`)
+        // whenever prevHash is undefined & syncCount is zero or lower
+        // write latest network chain to locals
+        const start = Date.now();
+        await this.resolveBlocks(multihash, index);
+        const end = Date.now();
+        const time = end - start;
+        console.log(time / 1000);
+        if (syncCount > 0) {
+          await this.updateLocals(multihash.toString('hex'), height, this.link);
+        }
+        await this.publish(this.link);
+      }
+      global.states.syncing = false;
+      bus.emit('syncing', false);
+      return
+    } catch (e) {
+      console.error('syncChain', e);
+    }
+  }
+
+  async localBlock() {
+    try {
+      const multihash = await read(localCurrent, 'string'); // read local chain state
+      const current = await this.get(multihash);
+      const { index } = JSON.parse(current.data.toString());;
+      debug(`current local dag: ${multihash}`);
+      return {
+        index,
+        multihash
+      }
+    } catch (e) {
+      await write(localCurrent, encode(Buffer.from(genesisCID, 'hex')));
+      return await this.localBlock();
+    }
+  }
+
+  async loadChain() {
+    await this.syncChain();
+    global.states.ready = true;
+    bus.emit('ready', true);
+  }
+
+  addBlock(block) {
+    return new Promise(async (resolve, reject) => {
+      log(`add block: ${block.index}  ${block.hash}`);
+      await this.updateLocalChain(block);
+      chain[block.index] = block;
+      // TODO: blockHashSet
+      bus.emit('block-added', block);
+      await this.pin(multihashFromHex(block.hash)); // pin block locally
+      await this.updateLocals(`1220${block.hash}`, block.index, this.link);
+      try {
+        // await this.publish(this.link);
+      } catch (e) {
+        console.warn(e);
+      }
+      block.transactions.forEach(transaction => {
+        const index = mempool.indexOf(transaction)
+        mempool.splice(index)
+      })
+    });
+  }
+  // TODO: write using ipfs.files.write
+  writeLocals(CID, DAGAdress) {
+    CID = encode(Buffer.from(CID, 'hex'));
+    debug(`writing CID ${CID} to ${localCurrent}`);
+    debug(`writing DAGAdress ${DAGAdress} to ${localDAGAddress}`);
+    return new Promise(async (resolve, reject) => {
+      // await write(localIndex, JSON.stringify(index));
+      await write(localCurrent, CID);
+      await write(localDAGAddress, DAGAdress);
+      resolve();
+    });
+  }
+
+  updateLocals(CID, height, DAGAdress) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // const index = await read(localIndex, 'json');
+        // index.push([height, CID]);
+        await this.writeLocals(CID, DAGAdress);
+      } catch (error) {
+        await this.writeLocals(CID, DAGAdress);
+      }
+      resolve();
+    });
+  }
+
+  /**
+   * Initialize a new chain on the IPFS network
+   * Creates creates & saves the genesisBlock to IPFS, blocks are pinned so they aren't removeable on the local side.
+   *
+   * @param {object} block The genesis block to write
+   * @setup PART of Easy setup your own blockchain, more info URL...
+   */
+   // TODO: switch to itx
+  async newDAGChain() {
+    try {
+      const genesisDAGNode = await newGenesisDAGNode(difficulty());
+      const block = await this.put(genesisDAGNode);
+      // await this.pin(encode(block.multihash));
+      const chainDAG = await this.ipfs.object.new('unixfs-dir');
+      const height = JSON.parse(genesisDAGNode.data.toString()).index;
+      const newDAGChain = await this.ipfs.object.patch.addLink(chainDAG.multihash, {name: height, size: block.size, multihash: block.multihash});
+      const CID = block.multihash.toString('hex'); // The CID as an base58 string
+      await this.updateLocals(CID, 0, encode(newDAGChain.multihash))
+      succes('genesisBlock created');
+      log(`genesisBlock: ${block.data.toString()}`);
+      log(`genesis: ${encode(block.data)}\nCID:\t${CID}`);
+      log(`DAGChain name ${encode(newDAGChain.multihash)}`);
+      return;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async updateLocalChain(block) {
+    const dagnode = new DAGBlock(global.ipfs)
+    const cid = await dagnode.put(block);
+    await this.addLink(this.link, {name: block.index, size: dagnode.node.size, cid});
+    return;
+  }
+
+  // TODO: go with previous block instead off lastBlock
+  // TODO: validate on sync ...
+  async announceBlock({data, from}) {
+      const block = JSON.parse(data.toString());
+      try {
+        // const previousBlock = await lastBlock(); // test
+        await validate(chain[chain.length - 1], block, difficulty(), getUnspent());
+        this.addBlock(block); // add to chain
+      } catch (error) {
+        // TODO: remove publish invalid-block
+        this.ipfs.pubsub.publish('invalid-block', new Buffer.from(JSON.stringify(block)));
+        bus.emit('invalid-block', block);
+        return console.error(error);
+      }
+    }
+}</code>
+  </span>
+ 
+  <span class="todo">
+  <h4>blockHashSet</h4>
+  <br>
+  <p><strong>line</strong>6736</p>
+  <code>export class DAGChain extends EventEmitter {
+  get link() {
+    return this.name.replace('/ipfs/', '')
+  }
+  get links() {
+    return this.node ? this.node.links : [];
+  }
+  get index() {
+    const links = [];
+    this.links.forEach(link => {
+
+      links[link.name] = link;
+    });
+    return links.length > 0 ? links : [];
+  }
+  constructor({genesis, ipfs}) {
+    super();
+    this.announceBlock = this.announceBlock.bind(this);
+
+    this.chain = chain;
+    this.ipfs = ipfs;
+  }
+
+  init() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.ipfs.pubsub.subscribe('block-added', this.announceBlock);
+        await this.ipfs.pubsub.subscribe('invalid-transaction', invalidTransaction);
+        log(`Running on the ${network} network`);
+        await this.loadChain();
+      } catch (error) {
+        // TODO: finishe the genesis module
+        if (genesis) {
+          log(`Creating genesis block on the ${network} network`);
+          await this.newDAGChain();
+        } else {
+          reject(error)
+        }
+      }
+    });
+  }
+  async resolve(name) {
+    return await this.ipfs.name.resolve(name, {recursive: true});
+  }
+
+  async get(multihash) {
+    const { value, remainderPath } = await this.ipfs.dag.get(multihash);
+    return value
+  }
+
+  async put(DAGNode) {
+    return await this.ipfs.object.put(DAGNode);
+  }
+
+  async pin(multihash) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.ipfs.pin.add(multihash, {recursive: true});
+        resolve();
+      } catch (e) {
+        reject(e)
+      }
+    });
+  }
+
+  /**
+   * addLink
+   */
+  async addLink(multihash, link) {
+    const newDAGChain = await this.ipfs.object.patch.addLink(multihash, link);
+    this.name = `/ipfs/${encode(newDAGChain.multihash)}`;
+    this.node = await this.get(this.link);
+    const published = await this.publish(encode(newDAGChain.multihash));
+    return published;
+  }
+
+  async lastLink() {
+    try {
+      await this.sync();
+      const height = Number(this.links.length) - 1;
+      for (const link of this.links) {
+        if (Number(link.name) === height) {
+          return link.multihash;
+        }
+      }
+    } catch (e) {
+      console.error('Sync Error::', e);
+    }
+  }
+
+  /**
+   * resolves to the latest chainObject
+   */
+  async sync() {
+    const { hash } = await longestChain();
+    this.name = hash || await localDAGMultiaddress();
+    this.node = await this.get(this.link);
+
+    log(`chain name: ${this.name}`);
+    log(`chain size: ${Math.round(Number(this.node.size) * 1e-6 * 100) / 100} Mb`);
+    return this.link;
+  }
+
+  async publish(multihash) {
+    const published = await this.ipfs.name.publish(multihash);
+    // if (this.name) {
+    //   await this.sync();
+    // }
+    await this.pin(published['value']);
+    return published['name']  // only needed when creating genesis block
+  }
+
+  async resolveBlocks(multihash, index) {
+    try {
+      const dagBlock = new DAGBlock(this.ipfs, encode(multihash));
+      const block = await dagBlock.get(encode(multihash));
+      // our hashes are prefixed by the 'sha2-256' code
+      // this results in hashes with 1220 at the start
+      // we remove the prefix by simply slicing the buffer
+      const hash = multihash.slice(2);
+      if (block.index > index) {
+        await this.pin(encode(multihash)); // pin block locally
+        console.log(`added block: ${block.index}  ${hash.toString('hex')}`);
+      }
+      // store them in memory
+      // global.blockHashSet[hash] = block.index;
+      block.hash = hash.toString('hex');
+      chain[block.index] = block;
+      // console.log(await dagBlock.getHeader(encode(multihash)));
+      debug(`loaded block: ${block.index}  ${hash.toString('hex')}`);
+      if (block.prevHash && block.prevHash.length > 3) {
+        return this.resolveBlocks(Buffer.from(`1220${block.prevHash}`, 'hex'), index);
+      }
+      return;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async syncChain() {
+    try {
+      global.states.syncing = true;
+      bus.emit('syncing', true);
+      if (this.index) {
+        const { index } = await this.localBlock();
+        const sync = await this.sync()
+        const height = this.index.length - 1;
+        const multihash = this.index[height].cid.multihash;
+        let syncCount = height - index;
+        debug(`local chain height: ${index}`);
+        debug(`network chain height: ${height}`);
+        debug(`syncing ${syncCount} block(s)`)
+        // whenever prevHash is undefined & syncCount is zero or lower
+        // write latest network chain to locals
+        const start = Date.now();
+        await this.resolveBlocks(multihash, index);
+        const end = Date.now();
+        const time = end - start;
+        console.log(time / 1000);
+        if (syncCount > 0) {
+          await this.updateLocals(multihash.toString('hex'), height, this.link);
+        }
+        await this.publish(this.link);
+      }
+      global.states.syncing = false;
+      bus.emit('syncing', false);
+      return
+    } catch (e) {
+      console.error('syncChain', e);
+    }
+  }
+
+  async localBlock() {
+    try {
+      const multihash = await read(localCurrent, 'string'); // read local chain state
+      const current = await this.get(multihash);
+      const { index } = JSON.parse(current.data.toString());;
+      debug(`current local dag: ${multihash}`);
+      return {
+        index,
+        multihash
+      }
+    } catch (e) {
+      await write(localCurrent, encode(Buffer.from(genesisCID, 'hex')));
+      return await this.localBlock();
+    }
+  }
+
+  async loadChain() {
+    await this.syncChain();
+    global.states.ready = true;
+    bus.emit('ready', true);
+  }
+
+  addBlock(block) {
+    return new Promise(async (resolve, reject) => {
+      log(`add block: ${block.index}  ${block.hash}`);
+      await this.updateLocalChain(block);
+      chain[block.index] = block;
+      // TODO: blockHashSet
+      bus.emit('block-added', block);
+      await this.pin(multihashFromHex(block.hash)); // pin block locally
+      await this.updateLocals(`1220${block.hash}`, block.index, this.link);
+      try {
+        // await this.publish(this.link);
+      } catch (e) {
+        console.warn(e);
+      }
+      block.transactions.forEach(transaction => {
+        const index = mempool.indexOf(transaction)
+        mempool.splice(index)
+      })
+    });
+  }
+  // TODO: write using ipfs.files.write
+  writeLocals(CID, DAGAdress) {
+    CID = encode(Buffer.from(CID, 'hex'));
+    debug(`writing CID ${CID} to ${localCurrent}`);
+    debug(`writing DAGAdress ${DAGAdress} to ${localDAGAddress}`);
+    return new Promise(async (resolve, reject) => {
+      // await write(localIndex, JSON.stringify(index));
+      await write(localCurrent, CID);
+      await write(localDAGAddress, DAGAdress);
+      resolve();
+    });
+  }
+
+  updateLocals(CID, height, DAGAdress) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // const index = await read(localIndex, 'json');
+        // index.push([height, CID]);
+        await this.writeLocals(CID, DAGAdress);
+      } catch (error) {
+        await this.writeLocals(CID, DAGAdress);
+      }
+      resolve();
+    });
+  }
+
+  /**
+   * Initialize a new chain on the IPFS network
+   * Creates creates & saves the genesisBlock to IPFS, blocks are pinned so they aren't removeable on the local side.
+   *
+   * @param {object} block The genesis block to write
+   * @setup PART of Easy setup your own blockchain, more info URL...
+   */
+   // TODO: switch to itx
+  async newDAGChain() {
+    try {
+      const genesisDAGNode = await newGenesisDAGNode(difficulty());
+      const block = await this.put(genesisDAGNode);
+      // await this.pin(encode(block.multihash));
+      const chainDAG = await this.ipfs.object.new('unixfs-dir');
+      const height = JSON.parse(genesisDAGNode.data.toString()).index;
+      const newDAGChain = await this.ipfs.object.patch.addLink(chainDAG.multihash, {name: height, size: block.size, multihash: block.multihash});
+      const CID = block.multihash.toString('hex'); // The CID as an base58 string
+      await this.updateLocals(CID, 0, encode(newDAGChain.multihash))
+      succes('genesisBlock created');
+      log(`genesisBlock: ${block.data.toString()}`);
+      log(`genesis: ${encode(block.data)}\nCID:\t${CID}`);
+      log(`DAGChain name ${encode(newDAGChain.multihash)}`);
+      return;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async updateLocalChain(block) {
+    const dagnode = new DAGBlock(global.ipfs)
+    const cid = await dagnode.put(block);
+    await this.addLink(this.link, {name: block.index, size: dagnode.node.size, cid});
+    return;
+  }
+
+  // TODO: go with previous block instead off lastBlock
+  // TODO: validate on sync ...
+  async announceBlock({data, from}) {
+      const block = JSON.parse(data.toString());
+      try {
+        // const previousBlock = await lastBlock(); // test
+        await validate(chain[chain.length - 1], block, difficulty(), getUnspent());
+        this.addBlock(block); // add to chain
+      } catch (error) {
+        // TODO: remove publish invalid-block
+        this.ipfs.pubsub.publish('invalid-block', new Buffer.from(JSON.stringify(block)));
+        bus.emit('invalid-block', block);
+        return console.error(error);
+      }
+    }
+}</code>
+  </span>
+ 
+  <span class="todo">
+  <h4>write using ipfs.files.write</h4>
+  <br>
+  <p><strong>line</strong>7221</p>
+  <code>export class DAGChain extends EventEmitter {
+  get link() {
+    return this.name.replace('/ipfs/', '')
+  }
+  get links() {
+    return this.node ? this.node.links : [];
+  }
+  get index() {
+    const links = [];
+    this.links.forEach(link => {
+
+      links[link.name] = link;
+    });
+    return links.length > 0 ? links : [];
+  }
+  constructor({genesis, ipfs}) {
+    super();
+    this.announceBlock = this.announceBlock.bind(this);
+
+    this.chain = chain;
+    this.ipfs = ipfs;
+  }
+
+  init() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.ipfs.pubsub.subscribe('block-added', this.announceBlock);
+        await this.ipfs.pubsub.subscribe('invalid-transaction', invalidTransaction);
+        log(`Running on the ${network} network`);
+        await this.loadChain();
+      } catch (error) {
+        // TODO: finishe the genesis module
+        if (genesis) {
+          log(`Creating genesis block on the ${network} network`);
+          await this.newDAGChain();
+        } else {
+          reject(error)
+        }
+      }
+    });
+  }
+  async resolve(name) {
+    return await this.ipfs.name.resolve(name, {recursive: true});
+  }
+
+  async get(multihash) {
+    const { value, remainderPath } = await this.ipfs.dag.get(multihash);
+    return value
+  }
+
+  async put(DAGNode) {
+    return await this.ipfs.object.put(DAGNode);
+  }
+
+  async pin(multihash) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.ipfs.pin.add(multihash, {recursive: true});
+        resolve();
+      } catch (e) {
+        reject(e)
+      }
+    });
+  }
+
+  /**
+   * addLink
+   */
+  async addLink(multihash, link) {
+    const newDAGChain = await this.ipfs.object.patch.addLink(multihash, link);
+    this.name = `/ipfs/${encode(newDAGChain.multihash)}`;
+    this.node = await this.get(this.link);
+    const published = await this.publish(encode(newDAGChain.multihash));
+    return published;
+  }
+
+  async lastLink() {
+    try {
+      await this.sync();
+      const height = Number(this.links.length) - 1;
+      for (const link of this.links) {
+        if (Number(link.name) === height) {
+          return link.multihash;
+        }
+      }
+    } catch (e) {
+      console.error('Sync Error::', e);
+    }
+  }
+
+  /**
+   * resolves to the latest chainObject
+   */
+  async sync() {
+    const { hash } = await longestChain();
+    this.name = hash || await localDAGMultiaddress();
+    this.node = await this.get(this.link);
+
+    log(`chain name: ${this.name}`);
+    log(`chain size: ${Math.round(Number(this.node.size) * 1e-6 * 100) / 100} Mb`);
+    return this.link;
+  }
+
+  async publish(multihash) {
+    const published = await this.ipfs.name.publish(multihash);
+    // if (this.name) {
+    //   await this.sync();
+    // }
+    await this.pin(published['value']);
+    return published['name']  // only needed when creating genesis block
+  }
+
+  async resolveBlocks(multihash, index) {
+    try {
+      const dagBlock = new DAGBlock(this.ipfs, encode(multihash));
+      const block = await dagBlock.get(encode(multihash));
+      // our hashes are prefixed by the 'sha2-256' code
+      // this results in hashes with 1220 at the start
+      // we remove the prefix by simply slicing the buffer
+      const hash = multihash.slice(2);
+      if (block.index > index) {
+        await this.pin(encode(multihash)); // pin block locally
+        console.log(`added block: ${block.index}  ${hash.toString('hex')}`);
+      }
+      // store them in memory
+      // global.blockHashSet[hash] = block.index;
+      block.hash = hash.toString('hex');
+      chain[block.index] = block;
+      // console.log(await dagBlock.getHeader(encode(multihash)));
+      debug(`loaded block: ${block.index}  ${hash.toString('hex')}`);
+      if (block.prevHash && block.prevHash.length > 3) {
+        return this.resolveBlocks(Buffer.from(`1220${block.prevHash}`, 'hex'), index);
+      }
+      return;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async syncChain() {
+    try {
+      global.states.syncing = true;
+      bus.emit('syncing', true);
+      if (this.index) {
+        const { index } = await this.localBlock();
+        const sync = await this.sync()
+        const height = this.index.length - 1;
+        const multihash = this.index[height].cid.multihash;
+        let syncCount = height - index;
+        debug(`local chain height: ${index}`);
+        debug(`network chain height: ${height}`);
+        debug(`syncing ${syncCount} block(s)`)
+        // whenever prevHash is undefined & syncCount is zero or lower
+        // write latest network chain to locals
+        const start = Date.now();
+        await this.resolveBlocks(multihash, index);
+        const end = Date.now();
+        const time = end - start;
+        console.log(time / 1000);
+        if (syncCount > 0) {
+          await this.updateLocals(multihash.toString('hex'), height, this.link);
+        }
+        await this.publish(this.link);
+      }
+      global.states.syncing = false;
+      bus.emit('syncing', false);
+      return
+    } catch (e) {
+      console.error('syncChain', e);
+    }
+  }
+
+  async localBlock() {
+    try {
+      const multihash = await read(localCurrent, 'string'); // read local chain state
+      const current = await this.get(multihash);
+      const { index } = JSON.parse(current.data.toString());;
+      debug(`current local dag: ${multihash}`);
+      return {
+        index,
+        multihash
+      }
+    } catch (e) {
+      await write(localCurrent, encode(Buffer.from(genesisCID, 'hex')));
+      return await this.localBlock();
+    }
+  }
+
+  async loadChain() {
+    await this.syncChain();
+    global.states.ready = true;
+    bus.emit('ready', true);
+  }
+
+  addBlock(block) {
+    return new Promise(async (resolve, reject) => {
+      log(`add block: ${block.index}  ${block.hash}`);
+      await this.updateLocalChain(block);
+      chain[block.index] = block;
+      // TODO: blockHashSet
+      bus.emit('block-added', block);
+      await this.pin(multihashFromHex(block.hash)); // pin block locally
+      await this.updateLocals(`1220${block.hash}`, block.index, this.link);
+      try {
+        // await this.publish(this.link);
+      } catch (e) {
+        console.warn(e);
+      }
+      block.transactions.forEach(transaction => {
+        const index = mempool.indexOf(transaction)
+        mempool.splice(index)
+      })
+    });
+  }
+  // TODO: write using ipfs.files.write
+  writeLocals(CID, DAGAdress) {
+    CID = encode(Buffer.from(CID, 'hex'));
+    debug(`writing CID ${CID} to ${localCurrent}`);
+    debug(`writing DAGAdress ${DAGAdress} to ${localDAGAddress}`);
+    return new Promise(async (resolve, reject) => {
+      // await write(localIndex, JSON.stringify(index));
+      await write(localCurrent, CID);
+      await write(localDAGAddress, DAGAdress);
+      resolve();
+    });
+  }
+
+  updateLocals(CID, height, DAGAdress) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // const index = await read(localIndex, 'json');
+        // index.push([height, CID]);
+        await this.writeLocals(CID, DAGAdress);
+      } catch (error) {
+        await this.writeLocals(CID, DAGAdress);
+      }
+      resolve();
+    });
+  }
+
+  /**
+   * Initialize a new chain on the IPFS network
+   * Creates creates & saves the genesisBlock to IPFS, blocks are pinned so they aren't removeable on the local side.
+   *
+   * @param {object} block The genesis block to write
+   * @setup PART of Easy setup your own blockchain, more info URL...
+   */
+   // TODO: switch to itx
+  async newDAGChain() {
+    try {
+      const genesisDAGNode = await newGenesisDAGNode(difficulty());
+      const block = await this.put(genesisDAGNode);
+      // await this.pin(encode(block.multihash));
+      const chainDAG = await this.ipfs.object.new('unixfs-dir');
+      const height = JSON.parse(genesisDAGNode.data.toString()).index;
+      const newDAGChain = await this.ipfs.object.patch.addLink(chainDAG.multihash, {name: height, size: block.size, multihash: block.multihash});
+      const CID = block.multihash.toString('hex'); // The CID as an base58 string
+      await this.updateLocals(CID, 0, encode(newDAGChain.multihash))
+      succes('genesisBlock created');
+      log(`genesisBlock: ${block.data.toString()}`);
+      log(`genesis: ${encode(block.data)}\nCID:\t${CID}`);
+      log(`DAGChain name ${encode(newDAGChain.multihash)}`);
+      return;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async updateLocalChain(block) {
+    const dagnode = new DAGBlock(global.ipfs)
+    const cid = await dagnode.put(block);
+    await this.addLink(this.link, {name: block.index, size: dagnode.node.size, cid});
+    return;
+  }
+
+  // TODO: go with previous block instead off lastBlock
+  // TODO: validate on sync ...
+  async announceBlock({data, from}) {
+      const block = JSON.parse(data.toString());
+      try {
+        // const previousBlock = await lastBlock(); // test
+        await validate(chain[chain.length - 1], block, difficulty(), getUnspent());
+        this.addBlock(block); // add to chain
+      } catch (error) {
+        // TODO: remove publish invalid-block
+        this.ipfs.pubsub.publish('invalid-block', new Buffer.from(JSON.stringify(block)));
+        bus.emit('invalid-block', block);
+        return console.error(error);
+      }
+    }
+}</code>
+  </span>
+ 
+  <span class="todo">
+  <h4>switch to itx</h4>
+  <br>
+  <p><strong>line</strong>8373</p>
+  <code>export class DAGChain extends EventEmitter {
+  get link() {
+    return this.name.replace('/ipfs/', '')
+  }
+  get links() {
+    return this.node ? this.node.links : [];
+  }
+  get index() {
+    const links = [];
+    this.links.forEach(link => {
+
+      links[link.name] = link;
+    });
+    return links.length > 0 ? links : [];
+  }
+  constructor({genesis, ipfs}) {
+    super();
+    this.announceBlock = this.announceBlock.bind(this);
+
+    this.chain = chain;
+    this.ipfs = ipfs;
+  }
+
+  init() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.ipfs.pubsub.subscribe('block-added', this.announceBlock);
+        await this.ipfs.pubsub.subscribe('invalid-transaction', invalidTransaction);
+        log(`Running on the ${network} network`);
+        await this.loadChain();
+      } catch (error) {
+        // TODO: finishe the genesis module
+        if (genesis) {
+          log(`Creating genesis block on the ${network} network`);
+          await this.newDAGChain();
+        } else {
+          reject(error)
+        }
+      }
+    });
+  }
+  async resolve(name) {
+    return await this.ipfs.name.resolve(name, {recursive: true});
+  }
+
+  async get(multihash) {
+    const { value, remainderPath } = await this.ipfs.dag.get(multihash);
+    return value
+  }
+
+  async put(DAGNode) {
+    return await this.ipfs.object.put(DAGNode);
+  }
+
+  async pin(multihash) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.ipfs.pin.add(multihash, {recursive: true});
+        resolve();
+      } catch (e) {
+        reject(e)
+      }
+    });
+  }
+
+  /**
+   * addLink
+   */
+  async addLink(multihash, link) {
+    const newDAGChain = await this.ipfs.object.patch.addLink(multihash, link);
+    this.name = `/ipfs/${encode(newDAGChain.multihash)}`;
+    this.node = await this.get(this.link);
+    const published = await this.publish(encode(newDAGChain.multihash));
+    return published;
+  }
+
+  async lastLink() {
+    try {
+      await this.sync();
+      const height = Number(this.links.length) - 1;
+      for (const link of this.links) {
+        if (Number(link.name) === height) {
+          return link.multihash;
+        }
+      }
+    } catch (e) {
+      console.error('Sync Error::', e);
+    }
+  }
+
+  /**
+   * resolves to the latest chainObject
+   */
+  async sync() {
+    const { hash } = await longestChain();
+    this.name = hash || await localDAGMultiaddress();
+    this.node = await this.get(this.link);
+
+    log(`chain name: ${this.name}`);
+    log(`chain size: ${Math.round(Number(this.node.size) * 1e-6 * 100) / 100} Mb`);
+    return this.link;
+  }
+
+  async publish(multihash) {
+    const published = await this.ipfs.name.publish(multihash);
+    // if (this.name) {
+    //   await this.sync();
+    // }
+    await this.pin(published['value']);
+    return published['name']  // only needed when creating genesis block
+  }
+
+  async resolveBlocks(multihash, index) {
+    try {
+      const dagBlock = new DAGBlock(this.ipfs, encode(multihash));
+      const block = await dagBlock.get(encode(multihash));
+      // our hashes are prefixed by the 'sha2-256' code
+      // this results in hashes with 1220 at the start
+      // we remove the prefix by simply slicing the buffer
+      const hash = multihash.slice(2);
+      if (block.index > index) {
+        await this.pin(encode(multihash)); // pin block locally
+        console.log(`added block: ${block.index}  ${hash.toString('hex')}`);
+      }
+      // store them in memory
+      // global.blockHashSet[hash] = block.index;
+      block.hash = hash.toString('hex');
+      chain[block.index] = block;
+      // console.log(await dagBlock.getHeader(encode(multihash)));
+      debug(`loaded block: ${block.index}  ${hash.toString('hex')}`);
+      if (block.prevHash && block.prevHash.length > 3) {
+        return this.resolveBlocks(Buffer.from(`1220${block.prevHash}`, 'hex'), index);
+      }
+      return;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async syncChain() {
+    try {
+      global.states.syncing = true;
+      bus.emit('syncing', true);
+      if (this.index) {
+        const { index } = await this.localBlock();
+        const sync = await this.sync()
+        const height = this.index.length - 1;
+        const multihash = this.index[height].cid.multihash;
+        let syncCount = height - index;
+        debug(`local chain height: ${index}`);
+        debug(`network chain height: ${height}`);
+        debug(`syncing ${syncCount} block(s)`)
+        // whenever prevHash is undefined & syncCount is zero or lower
+        // write latest network chain to locals
+        const start = Date.now();
+        await this.resolveBlocks(multihash, index);
+        const end = Date.now();
+        const time = end - start;
+        console.log(time / 1000);
+        if (syncCount > 0) {
+          await this.updateLocals(multihash.toString('hex'), height, this.link);
+        }
+        await this.publish(this.link);
+      }
+      global.states.syncing = false;
+      bus.emit('syncing', false);
+      return
+    } catch (e) {
+      console.error('syncChain', e);
+    }
+  }
+
+  async localBlock() {
+    try {
+      const multihash = await read(localCurrent, 'string'); // read local chain state
+      const current = await this.get(multihash);
+      const { index } = JSON.parse(current.data.toString());;
+      debug(`current local dag: ${multihash}`);
+      return {
+        index,
+        multihash
+      }
+    } catch (e) {
+      await write(localCurrent, encode(Buffer.from(genesisCID, 'hex')));
+      return await this.localBlock();
+    }
+  }
+
+  async loadChain() {
+    await this.syncChain();
+    global.states.ready = true;
+    bus.emit('ready', true);
+  }
+
+  addBlock(block) {
+    return new Promise(async (resolve, reject) => {
+      log(`add block: ${block.index}  ${block.hash}`);
+      await this.updateLocalChain(block);
+      chain[block.index] = block;
+      // TODO: blockHashSet
+      bus.emit('block-added', block);
+      await this.pin(multihashFromHex(block.hash)); // pin block locally
+      await this.updateLocals(`1220${block.hash}`, block.index, this.link);
+      try {
+        // await this.publish(this.link);
+      } catch (e) {
+        console.warn(e);
+      }
+      block.transactions.forEach(transaction => {
+        const index = mempool.indexOf(transaction)
+        mempool.splice(index)
+      })
+    });
+  }
+  // TODO: write using ipfs.files.write
+  writeLocals(CID, DAGAdress) {
+    CID = encode(Buffer.from(CID, 'hex'));
+    debug(`writing CID ${CID} to ${localCurrent}`);
+    debug(`writing DAGAdress ${DAGAdress} to ${localDAGAddress}`);
+    return new Promise(async (resolve, reject) => {
+      // await write(localIndex, JSON.stringify(index));
+      await write(localCurrent, CID);
+      await write(localDAGAddress, DAGAdress);
+      resolve();
+    });
+  }
+
+  updateLocals(CID, height, DAGAdress) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // const index = await read(localIndex, 'json');
+        // index.push([height, CID]);
+        await this.writeLocals(CID, DAGAdress);
+      } catch (error) {
+        await this.writeLocals(CID, DAGAdress);
+      }
+      resolve();
+    });
+  }
+
+  /**
+   * Initialize a new chain on the IPFS network
+   * Creates creates & saves the genesisBlock to IPFS, blocks are pinned so they aren't removeable on the local side.
+   *
+   * @param {object} block The genesis block to write
+   * @setup PART of Easy setup your own blockchain, more info URL...
+   */
+   // TODO: switch to itx
+  async newDAGChain() {
+    try {
+      const genesisDAGNode = await newGenesisDAGNode(difficulty());
+      const block = await this.put(genesisDAGNode);
+      // await this.pin(encode(block.multihash));
+      const chainDAG = await this.ipfs.object.new('unixfs-dir');
+      const height = JSON.parse(genesisDAGNode.data.toString()).index;
+      const newDAGChain = await this.ipfs.object.patch.addLink(chainDAG.multihash, {name: height, size: block.size, multihash: block.multihash});
+      const CID = block.multihash.toString('hex'); // The CID as an base58 string
+      await this.updateLocals(CID, 0, encode(newDAGChain.multihash))
+      succes('genesisBlock created');
+      log(`genesisBlock: ${block.data.toString()}`);
+      log(`genesis: ${encode(block.data)}\nCID:\t${CID}`);
+      log(`DAGChain name ${encode(newDAGChain.multihash)}`);
+      return;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async updateLocalChain(block) {
+    const dagnode = new DAGBlock(global.ipfs)
+    const cid = await dagnode.put(block);
+    await this.addLink(this.link, {name: block.index, size: dagnode.node.size, cid});
+    return;
+  }
+
+  // TODO: go with previous block instead off lastBlock
+  // TODO: validate on sync ...
+  async announceBlock({data, from}) {
+      const block = JSON.parse(data.toString());
+      try {
+        // const previousBlock = await lastBlock(); // test
+        await validate(chain[chain.length - 1], block, difficulty(), getUnspent());
+        this.addBlock(block); // add to chain
+      } catch (error) {
+        // TODO: remove publish invalid-block
+        this.ipfs.pubsub.publish('invalid-block', new Buffer.from(JSON.stringify(block)));
+        bus.emit('invalid-block', block);
+        return console.error(error);
+      }
+    }
+}</code>
+  </span>
+ 
+  <span class="todo">
+  <h4>go with previous block instead off lastBlock</h4>
+  <br>
+  <p><strong>line</strong>9565</p>
+  <code>export class DAGChain extends EventEmitter {
+  get link() {
+    return this.name.replace('/ipfs/', '')
+  }
+  get links() {
+    return this.node ? this.node.links : [];
+  }
+  get index() {
+    const links = [];
+    this.links.forEach(link => {
+
+      links[link.name] = link;
+    });
+    return links.length > 0 ? links : [];
+  }
+  constructor({genesis, ipfs}) {
+    super();
+    this.announceBlock = this.announceBlock.bind(this);
+
+    this.chain = chain;
+    this.ipfs = ipfs;
+  }
+
+  init() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.ipfs.pubsub.subscribe('block-added', this.announceBlock);
+        await this.ipfs.pubsub.subscribe('invalid-transaction', invalidTransaction);
+        log(`Running on the ${network} network`);
+        await this.loadChain();
+      } catch (error) {
+        // TODO: finishe the genesis module
+        if (genesis) {
+          log(`Creating genesis block on the ${network} network`);
+          await this.newDAGChain();
+        } else {
+          reject(error)
+        }
+      }
+    });
+  }
+  async resolve(name) {
+    return await this.ipfs.name.resolve(name, {recursive: true});
+  }
+
+  async get(multihash) {
+    const { value, remainderPath } = await this.ipfs.dag.get(multihash);
+    return value
+  }
+
+  async put(DAGNode) {
+    return await this.ipfs.object.put(DAGNode);
+  }
+
+  async pin(multihash) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.ipfs.pin.add(multihash, {recursive: true});
+        resolve();
+      } catch (e) {
+        reject(e)
+      }
+    });
+  }
+
+  /**
+   * addLink
+   */
+  async addLink(multihash, link) {
+    const newDAGChain = await this.ipfs.object.patch.addLink(multihash, link);
+    this.name = `/ipfs/${encode(newDAGChain.multihash)}`;
+    this.node = await this.get(this.link);
+    const published = await this.publish(encode(newDAGChain.multihash));
+    return published;
+  }
+
+  async lastLink() {
+    try {
+      await this.sync();
+      const height = Number(this.links.length) - 1;
+      for (const link of this.links) {
+        if (Number(link.name) === height) {
+          return link.multihash;
+        }
+      }
+    } catch (e) {
+      console.error('Sync Error::', e);
+    }
+  }
+
+  /**
+   * resolves to the latest chainObject
+   */
+  async sync() {
+    const { hash } = await longestChain();
+    this.name = hash || await localDAGMultiaddress();
+    this.node = await this.get(this.link);
+
+    log(`chain name: ${this.name}`);
+    log(`chain size: ${Math.round(Number(this.node.size) * 1e-6 * 100) / 100} Mb`);
+    return this.link;
+  }
+
+  async publish(multihash) {
+    const published = await this.ipfs.name.publish(multihash);
+    // if (this.name) {
+    //   await this.sync();
+    // }
+    await this.pin(published['value']);
+    return published['name']  // only needed when creating genesis block
+  }
+
+  async resolveBlocks(multihash, index) {
+    try {
+      const dagBlock = new DAGBlock(this.ipfs, encode(multihash));
+      const block = await dagBlock.get(encode(multihash));
+      // our hashes are prefixed by the 'sha2-256' code
+      // this results in hashes with 1220 at the start
+      // we remove the prefix by simply slicing the buffer
+      const hash = multihash.slice(2);
+      if (block.index > index) {
+        await this.pin(encode(multihash)); // pin block locally
+        console.log(`added block: ${block.index}  ${hash.toString('hex')}`);
+      }
+      // store them in memory
+      // global.blockHashSet[hash] = block.index;
+      block.hash = hash.toString('hex');
+      chain[block.index] = block;
+      // console.log(await dagBlock.getHeader(encode(multihash)));
+      debug(`loaded block: ${block.index}  ${hash.toString('hex')}`);
+      if (block.prevHash && block.prevHash.length > 3) {
+        return this.resolveBlocks(Buffer.from(`1220${block.prevHash}`, 'hex'), index);
+      }
+      return;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async syncChain() {
+    try {
+      global.states.syncing = true;
+      bus.emit('syncing', true);
+      if (this.index) {
+        const { index } = await this.localBlock();
+        const sync = await this.sync()
+        const height = this.index.length - 1;
+        const multihash = this.index[height].cid.multihash;
+        let syncCount = height - index;
+        debug(`local chain height: ${index}`);
+        debug(`network chain height: ${height}`);
+        debug(`syncing ${syncCount} block(s)`)
+        // whenever prevHash is undefined & syncCount is zero or lower
+        // write latest network chain to locals
+        const start = Date.now();
+        await this.resolveBlocks(multihash, index);
+        const end = Date.now();
+        const time = end - start;
+        console.log(time / 1000);
+        if (syncCount > 0) {
+          await this.updateLocals(multihash.toString('hex'), height, this.link);
+        }
+        await this.publish(this.link);
+      }
+      global.states.syncing = false;
+      bus.emit('syncing', false);
+      return
+    } catch (e) {
+      console.error('syncChain', e);
+    }
+  }
+
+  async localBlock() {
+    try {
+      const multihash = await read(localCurrent, 'string'); // read local chain state
+      const current = await this.get(multihash);
+      const { index } = JSON.parse(current.data.toString());;
+      debug(`current local dag: ${multihash}`);
+      return {
+        index,
+        multihash
+      }
+    } catch (e) {
+      await write(localCurrent, encode(Buffer.from(genesisCID, 'hex')));
+      return await this.localBlock();
+    }
+  }
+
+  async loadChain() {
+    await this.syncChain();
+    global.states.ready = true;
+    bus.emit('ready', true);
+  }
+
+  addBlock(block) {
+    return new Promise(async (resolve, reject) => {
+      log(`add block: ${block.index}  ${block.hash}`);
+      await this.updateLocalChain(block);
+      chain[block.index] = block;
+      // TODO: blockHashSet
+      bus.emit('block-added', block);
+      await this.pin(multihashFromHex(block.hash)); // pin block locally
+      await this.updateLocals(`1220${block.hash}`, block.index, this.link);
+      try {
+        // await this.publish(this.link);
+      } catch (e) {
+        console.warn(e);
+      }
+      block.transactions.forEach(transaction => {
+        const index = mempool.indexOf(transaction)
+        mempool.splice(index)
+      })
+    });
+  }
+  // TODO: write using ipfs.files.write
+  writeLocals(CID, DAGAdress) {
+    CID = encode(Buffer.from(CID, 'hex'));
+    debug(`writing CID ${CID} to ${localCurrent}`);
+    debug(`writing DAGAdress ${DAGAdress} to ${localDAGAddress}`);
+    return new Promise(async (resolve, reject) => {
+      // await write(localIndex, JSON.stringify(index));
+      await write(localCurrent, CID);
+      await write(localDAGAddress, DAGAdress);
+      resolve();
+    });
+  }
+
+  updateLocals(CID, height, DAGAdress) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // const index = await read(localIndex, 'json');
+        // index.push([height, CID]);
+        await this.writeLocals(CID, DAGAdress);
+      } catch (error) {
+        await this.writeLocals(CID, DAGAdress);
+      }
+      resolve();
+    });
+  }
+
+  /**
+   * Initialize a new chain on the IPFS network
+   * Creates creates & saves the genesisBlock to IPFS, blocks are pinned so they aren't removeable on the local side.
+   *
+   * @param {object} block The genesis block to write
+   * @setup PART of Easy setup your own blockchain, more info URL...
+   */
+   // TODO: switch to itx
+  async newDAGChain() {
+    try {
+      const genesisDAGNode = await newGenesisDAGNode(difficulty());
+      const block = await this.put(genesisDAGNode);
+      // await this.pin(encode(block.multihash));
+      const chainDAG = await this.ipfs.object.new('unixfs-dir');
+      const height = JSON.parse(genesisDAGNode.data.toString()).index;
+      const newDAGChain = await this.ipfs.object.patch.addLink(chainDAG.multihash, {name: height, size: block.size, multihash: block.multihash});
+      const CID = block.multihash.toString('hex'); // The CID as an base58 string
+      await this.updateLocals(CID, 0, encode(newDAGChain.multihash))
+      succes('genesisBlock created');
+      log(`genesisBlock: ${block.data.toString()}`);
+      log(`genesis: ${encode(block.data)}\nCID:\t${CID}`);
+      log(`DAGChain name ${encode(newDAGChain.multihash)}`);
+      return;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async updateLocalChain(block) {
+    const dagnode = new DAGBlock(global.ipfs)
+    const cid = await dagnode.put(block);
+    await this.addLink(this.link, {name: block.index, size: dagnode.node.size, cid});
+    return;
+  }
+
+  // TODO: go with previous block instead off lastBlock
+  // TODO: validate on sync ...
+  async announceBlock({data, from}) {
+      const block = JSON.parse(data.toString());
+      try {
+        // const previousBlock = await lastBlock(); // test
+        await validate(chain[chain.length - 1], block, difficulty(), getUnspent());
+        this.addBlock(block); // add to chain
+      } catch (error) {
+        // TODO: remove publish invalid-block
+        this.ipfs.pubsub.publish('invalid-block', new Buffer.from(JSON.stringify(block)));
+        bus.emit('invalid-block', block);
+        return console.error(error);
+      }
+    }
+}</code>
+  </span>
+ 
+  <span class="todo">
+  <h4>validate on sync ...</h4>
+  <br>
+  <p><strong>line</strong>9622</p>
+  <code>export class DAGChain extends EventEmitter {
+  get link() {
+    return this.name.replace('/ipfs/', '')
+  }
+  get links() {
+    return this.node ? this.node.links : [];
+  }
+  get index() {
+    const links = [];
+    this.links.forEach(link => {
+
+      links[link.name] = link;
+    });
+    return links.length > 0 ? links : [];
+  }
+  constructor({genesis, ipfs}) {
+    super();
+    this.announceBlock = this.announceBlock.bind(this);
+
+    this.chain = chain;
+    this.ipfs = ipfs;
+  }
+
+  init() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.ipfs.pubsub.subscribe('block-added', this.announceBlock);
+        await this.ipfs.pubsub.subscribe('invalid-transaction', invalidTransaction);
+        log(`Running on the ${network} network`);
+        await this.loadChain();
+      } catch (error) {
+        // TODO: finishe the genesis module
+        if (genesis) {
+          log(`Creating genesis block on the ${network} network`);
+          await this.newDAGChain();
+        } else {
+          reject(error)
+        }
+      }
+    });
+  }
+  async resolve(name) {
+    return await this.ipfs.name.resolve(name, {recursive: true});
+  }
+
+  async get(multihash) {
+    const { value, remainderPath } = await this.ipfs.dag.get(multihash);
+    return value
+  }
+
+  async put(DAGNode) {
+    return await this.ipfs.object.put(DAGNode);
+  }
+
+  async pin(multihash) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.ipfs.pin.add(multihash, {recursive: true});
+        resolve();
+      } catch (e) {
+        reject(e)
+      }
+    });
+  }
+
+  /**
+   * addLink
+   */
+  async addLink(multihash, link) {
+    const newDAGChain = await this.ipfs.object.patch.addLink(multihash, link);
+    this.name = `/ipfs/${encode(newDAGChain.multihash)}`;
+    this.node = await this.get(this.link);
+    const published = await this.publish(encode(newDAGChain.multihash));
+    return published;
+  }
+
+  async lastLink() {
+    try {
+      await this.sync();
+      const height = Number(this.links.length) - 1;
+      for (const link of this.links) {
+        if (Number(link.name) === height) {
+          return link.multihash;
+        }
+      }
+    } catch (e) {
+      console.error('Sync Error::', e);
+    }
+  }
+
+  /**
+   * resolves to the latest chainObject
+   */
+  async sync() {
+    const { hash } = await longestChain();
+    this.name = hash || await localDAGMultiaddress();
+    this.node = await this.get(this.link);
+
+    log(`chain name: ${this.name}`);
+    log(`chain size: ${Math.round(Number(this.node.size) * 1e-6 * 100) / 100} Mb`);
+    return this.link;
+  }
+
+  async publish(multihash) {
+    const published = await this.ipfs.name.publish(multihash);
+    // if (this.name) {
+    //   await this.sync();
+    // }
+    await this.pin(published['value']);
+    return published['name']  // only needed when creating genesis block
+  }
+
+  async resolveBlocks(multihash, index) {
+    try {
+      const dagBlock = new DAGBlock(this.ipfs, encode(multihash));
+      const block = await dagBlock.get(encode(multihash));
+      // our hashes are prefixed by the 'sha2-256' code
+      // this results in hashes with 1220 at the start
+      // we remove the prefix by simply slicing the buffer
+      const hash = multihash.slice(2);
+      if (block.index > index) {
+        await this.pin(encode(multihash)); // pin block locally
+        console.log(`added block: ${block.index}  ${hash.toString('hex')}`);
+      }
+      // store them in memory
+      // global.blockHashSet[hash] = block.index;
+      block.hash = hash.toString('hex');
+      chain[block.index] = block;
+      // console.log(await dagBlock.getHeader(encode(multihash)));
+      debug(`loaded block: ${block.index}  ${hash.toString('hex')}`);
+      if (block.prevHash && block.prevHash.length > 3) {
+        return this.resolveBlocks(Buffer.from(`1220${block.prevHash}`, 'hex'), index);
+      }
+      return;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async syncChain() {
+    try {
+      global.states.syncing = true;
+      bus.emit('syncing', true);
+      if (this.index) {
+        const { index } = await this.localBlock();
+        const sync = await this.sync()
+        const height = this.index.length - 1;
+        const multihash = this.index[height].cid.multihash;
+        let syncCount = height - index;
+        debug(`local chain height: ${index}`);
+        debug(`network chain height: ${height}`);
+        debug(`syncing ${syncCount} block(s)`)
+        // whenever prevHash is undefined & syncCount is zero or lower
+        // write latest network chain to locals
+        const start = Date.now();
+        await this.resolveBlocks(multihash, index);
+        const end = Date.now();
+        const time = end - start;
+        console.log(time / 1000);
+        if (syncCount > 0) {
+          await this.updateLocals(multihash.toString('hex'), height, this.link);
+        }
+        await this.publish(this.link);
+      }
+      global.states.syncing = false;
+      bus.emit('syncing', false);
+      return
+    } catch (e) {
+      console.error('syncChain', e);
+    }
+  }
+
+  async localBlock() {
+    try {
+      const multihash = await read(localCurrent, 'string'); // read local chain state
+      const current = await this.get(multihash);
+      const { index } = JSON.parse(current.data.toString());;
+      debug(`current local dag: ${multihash}`);
+      return {
+        index,
+        multihash
+      }
+    } catch (e) {
+      await write(localCurrent, encode(Buffer.from(genesisCID, 'hex')));
+      return await this.localBlock();
+    }
+  }
+
+  async loadChain() {
+    await this.syncChain();
+    global.states.ready = true;
+    bus.emit('ready', true);
+  }
+
+  addBlock(block) {
+    return new Promise(async (resolve, reject) => {
+      log(`add block: ${block.index}  ${block.hash}`);
+      await this.updateLocalChain(block);
+      chain[block.index] = block;
+      // TODO: blockHashSet
+      bus.emit('block-added', block);
+      await this.pin(multihashFromHex(block.hash)); // pin block locally
+      await this.updateLocals(`1220${block.hash}`, block.index, this.link);
+      try {
+        // await this.publish(this.link);
+      } catch (e) {
+        console.warn(e);
+      }
+      block.transactions.forEach(transaction => {
+        const index = mempool.indexOf(transaction)
+        mempool.splice(index)
+      })
+    });
+  }
+  // TODO: write using ipfs.files.write
+  writeLocals(CID, DAGAdress) {
+    CID = encode(Buffer.from(CID, 'hex'));
+    debug(`writing CID ${CID} to ${localCurrent}`);
+    debug(`writing DAGAdress ${DAGAdress} to ${localDAGAddress}`);
+    return new Promise(async (resolve, reject) => {
+      // await write(localIndex, JSON.stringify(index));
+      await write(localCurrent, CID);
+      await write(localDAGAddress, DAGAdress);
+      resolve();
+    });
+  }
+
+  updateLocals(CID, height, DAGAdress) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // const index = await read(localIndex, 'json');
+        // index.push([height, CID]);
+        await this.writeLocals(CID, DAGAdress);
+      } catch (error) {
+        await this.writeLocals(CID, DAGAdress);
+      }
+      resolve();
+    });
+  }
+
+  /**
+   * Initialize a new chain on the IPFS network
+   * Creates creates & saves the genesisBlock to IPFS, blocks are pinned so they aren't removeable on the local side.
+   *
+   * @param {object} block The genesis block to write
+   * @setup PART of Easy setup your own blockchain, more info URL...
+   */
+   // TODO: switch to itx
+  async newDAGChain() {
+    try {
+      const genesisDAGNode = await newGenesisDAGNode(difficulty());
+      const block = await this.put(genesisDAGNode);
+      // await this.pin(encode(block.multihash));
+      const chainDAG = await this.ipfs.object.new('unixfs-dir');
+      const height = JSON.parse(genesisDAGNode.data.toString()).index;
+      const newDAGChain = await this.ipfs.object.patch.addLink(chainDAG.multihash, {name: height, size: block.size, multihash: block.multihash});
+      const CID = block.multihash.toString('hex'); // The CID as an base58 string
+      await this.updateLocals(CID, 0, encode(newDAGChain.multihash))
+      succes('genesisBlock created');
+      log(`genesisBlock: ${block.data.toString()}`);
+      log(`genesis: ${encode(block.data)}\nCID:\t${CID}`);
+      log(`DAGChain name ${encode(newDAGChain.multihash)}`);
+      return;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async updateLocalChain(block) {
+    const dagnode = new DAGBlock(global.ipfs)
+    const cid = await dagnode.put(block);
+    await this.addLink(this.link, {name: block.index, size: dagnode.node.size, cid});
+    return;
+  }
+
+  // TODO: go with previous block instead off lastBlock
+  // TODO: validate on sync ...
+  async announceBlock({data, from}) {
+      const block = JSON.parse(data.toString());
+      try {
+        // const previousBlock = await lastBlock(); // test
+        await validate(chain[chain.length - 1], block, difficulty(), getUnspent());
+        this.addBlock(block); // add to chain
+      } catch (error) {
+        // TODO: remove publish invalid-block
+        this.ipfs.pubsub.publish('invalid-block', new Buffer.from(JSON.stringify(block)));
+        bus.emit('invalid-block', block);
+        return console.error(error);
+      }
+    }
+}</code>
+  </span>
+ 
+  <span class="todo">
+  <h4>remove publish invalid-block</h4>
+  <br>
+  <p><strong>line</strong>9981</p>
+  <code>export class DAGChain extends EventEmitter {
+  get link() {
+    return this.name.replace('/ipfs/', '')
+  }
+  get links() {
+    return this.node ? this.node.links : [];
+  }
+  get index() {
+    const links = [];
+    this.links.forEach(link => {
+
+      links[link.name] = link;
+    });
+    return links.length > 0 ? links : [];
+  }
+  constructor({genesis, ipfs}) {
+    super();
+    this.announceBlock = this.announceBlock.bind(this);
+
+    this.chain = chain;
+    this.ipfs = ipfs;
+  }
+
+  init() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.ipfs.pubsub.subscribe('block-added', this.announceBlock);
+        await this.ipfs.pubsub.subscribe('invalid-transaction', invalidTransaction);
+        log(`Running on the ${network} network`);
+        await this.loadChain();
+      } catch (error) {
+        // TODO: finishe the genesis module
+        if (genesis) {
+          log(`Creating genesis block on the ${network} network`);
+          await this.newDAGChain();
+        } else {
+          reject(error)
+        }
+      }
+    });
+  }
+  async resolve(name) {
+    return await this.ipfs.name.resolve(name, {recursive: true});
+  }
+
+  async get(multihash) {
+    const { value, remainderPath } = await this.ipfs.dag.get(multihash);
+    return value
+  }
+
+  async put(DAGNode) {
+    return await this.ipfs.object.put(DAGNode);
+  }
+
+  async pin(multihash) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.ipfs.pin.add(multihash, {recursive: true});
+        resolve();
+      } catch (e) {
+        reject(e)
+      }
+    });
+  }
+
+  /**
+   * addLink
+   */
+  async addLink(multihash, link) {
+    const newDAGChain = await this.ipfs.object.patch.addLink(multihash, link);
+    this.name = `/ipfs/${encode(newDAGChain.multihash)}`;
+    this.node = await this.get(this.link);
+    const published = await this.publish(encode(newDAGChain.multihash));
+    return published;
+  }
+
+  async lastLink() {
+    try {
+      await this.sync();
+      const height = Number(this.links.length) - 1;
+      for (const link of this.links) {
+        if (Number(link.name) === height) {
+          return link.multihash;
+        }
+      }
+    } catch (e) {
+      console.error('Sync Error::', e);
+    }
+  }
+
+  /**
+   * resolves to the latest chainObject
+   */
+  async sync() {
+    const { hash } = await longestChain();
+    this.name = hash || await localDAGMultiaddress();
+    this.node = await this.get(this.link);
+
+    log(`chain name: ${this.name}`);
+    log(`chain size: ${Math.round(Number(this.node.size) * 1e-6 * 100) / 100} Mb`);
+    return this.link;
+  }
+
+  async publish(multihash) {
+    const published = await this.ipfs.name.publish(multihash);
+    // if (this.name) {
+    //   await this.sync();
+    // }
+    await this.pin(published['value']);
+    return published['name']  // only needed when creating genesis block
+  }
+
+  async resolveBlocks(multihash, index) {
+    try {
+      const dagBlock = new DAGBlock(this.ipfs, encode(multihash));
+      const block = await dagBlock.get(encode(multihash));
+      // our hashes are prefixed by the 'sha2-256' code
+      // this results in hashes with 1220 at the start
+      // we remove the prefix by simply slicing the buffer
+      const hash = multihash.slice(2);
+      if (block.index > index) {
+        await this.pin(encode(multihash)); // pin block locally
+        console.log(`added block: ${block.index}  ${hash.toString('hex')}`);
+      }
+      // store them in memory
+      // global.blockHashSet[hash] = block.index;
+      block.hash = hash.toString('hex');
+      chain[block.index] = block;
+      // console.log(await dagBlock.getHeader(encode(multihash)));
+      debug(`loaded block: ${block.index}  ${hash.toString('hex')}`);
+      if (block.prevHash && block.prevHash.length > 3) {
+        return this.resolveBlocks(Buffer.from(`1220${block.prevHash}`, 'hex'), index);
+      }
+      return;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async syncChain() {
+    try {
+      global.states.syncing = true;
+      bus.emit('syncing', true);
+      if (this.index) {
+        const { index } = await this.localBlock();
+        const sync = await this.sync()
+        const height = this.index.length - 1;
+        const multihash = this.index[height].cid.multihash;
+        let syncCount = height - index;
+        debug(`local chain height: ${index}`);
+        debug(`network chain height: ${height}`);
+        debug(`syncing ${syncCount} block(s)`)
+        // whenever prevHash is undefined & syncCount is zero or lower
+        // write latest network chain to locals
+        const start = Date.now();
+        await this.resolveBlocks(multihash, index);
+        const end = Date.now();
+        const time = end - start;
+        console.log(time / 1000);
+        if (syncCount > 0) {
+          await this.updateLocals(multihash.toString('hex'), height, this.link);
+        }
+        await this.publish(this.link);
+      }
+      global.states.syncing = false;
+      bus.emit('syncing', false);
+      return
+    } catch (e) {
+      console.error('syncChain', e);
+    }
+  }
+
+  async localBlock() {
+    try {
+      const multihash = await read(localCurrent, 'string'); // read local chain state
+      const current = await this.get(multihash);
+      const { index } = JSON.parse(current.data.toString());;
+      debug(`current local dag: ${multihash}`);
+      return {
+        index,
+        multihash
+      }
+    } catch (e) {
+      await write(localCurrent, encode(Buffer.from(genesisCID, 'hex')));
+      return await this.localBlock();
+    }
+  }
+
+  async loadChain() {
+    await this.syncChain();
+    global.states.ready = true;
+    bus.emit('ready', true);
+  }
+
+  addBlock(block) {
+    return new Promise(async (resolve, reject) => {
+      log(`add block: ${block.index}  ${block.hash}`);
+      await this.updateLocalChain(block);
+      chain[block.index] = block;
+      // TODO: blockHashSet
+      bus.emit('block-added', block);
+      await this.pin(multihashFromHex(block.hash)); // pin block locally
+      await this.updateLocals(`1220${block.hash}`, block.index, this.link);
+      try {
+        // await this.publish(this.link);
+      } catch (e) {
+        console.warn(e);
+      }
+      block.transactions.forEach(transaction => {
+        const index = mempool.indexOf(transaction)
+        mempool.splice(index)
+      })
+    });
+  }
+  // TODO: write using ipfs.files.write
+  writeLocals(CID, DAGAdress) {
+    CID = encode(Buffer.from(CID, 'hex'));
+    debug(`writing CID ${CID} to ${localCurrent}`);
+    debug(`writing DAGAdress ${DAGAdress} to ${localDAGAddress}`);
+    return new Promise(async (resolve, reject) => {
+      // await write(localIndex, JSON.stringify(index));
+      await write(localCurrent, CID);
+      await write(localDAGAddress, DAGAdress);
+      resolve();
+    });
+  }
+
+  updateLocals(CID, height, DAGAdress) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // const index = await read(localIndex, 'json');
+        // index.push([height, CID]);
+        await this.writeLocals(CID, DAGAdress);
+      } catch (error) {
+        await this.writeLocals(CID, DAGAdress);
+      }
+      resolve();
+    });
+  }
+
+  /**
+   * Initialize a new chain on the IPFS network
+   * Creates creates & saves the genesisBlock to IPFS, blocks are pinned so they aren't removeable on the local side.
+   *
+   * @param {object} block The genesis block to write
+   * @setup PART of Easy setup your own blockchain, more info URL...
+   */
+   // TODO: switch to itx
+  async newDAGChain() {
+    try {
+      const genesisDAGNode = await newGenesisDAGNode(difficulty());
+      const block = await this.put(genesisDAGNode);
+      // await this.pin(encode(block.multihash));
+      const chainDAG = await this.ipfs.object.new('unixfs-dir');
+      const height = JSON.parse(genesisDAGNode.data.toString()).index;
+      const newDAGChain = await this.ipfs.object.patch.addLink(chainDAG.multihash, {name: height, size: block.size, multihash: block.multihash});
+      const CID = block.multihash.toString('hex'); // The CID as an base58 string
+      await this.updateLocals(CID, 0, encode(newDAGChain.multihash))
+      succes('genesisBlock created');
+      log(`genesisBlock: ${block.data.toString()}`);
+      log(`genesis: ${encode(block.data)}\nCID:\t${CID}`);
+      log(`DAGChain name ${encode(newDAGChain.multihash)}`);
+      return;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async updateLocalChain(block) {
+    const dagnode = new DAGBlock(global.ipfs)
+    const cid = await dagnode.put(block);
+    await this.addLink(this.link, {name: block.index, size: dagnode.node.size, cid});
+    return;
+  }
+
+  // TODO: go with previous block instead off lastBlock
+  // TODO: validate on sync ...
+  async announceBlock({data, from}) {
+      const block = JSON.parse(data.toString());
+      try {
+        // const previousBlock = await lastBlock(); // test
+        await validate(chain[chain.length - 1], block, difficulty(), getUnspent());
+        this.addBlock(block); // add to chain
+      } catch (error) {
+        // TODO: remove publish invalid-block
+        this.ipfs.pubsub.publish('invalid-block', new Buffer.from(JSON.stringify(block)));
+        bus.emit('invalid-block', block);
+        return console.error(error);
+      }
+    }
+}</code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin-core\src\lib\network\room.js</h3>
+
+  <span class="todo">
+  <h4>create bootstrap according peer reputation ...</h4>
+  <br>
+  <p><strong>line</strong>176</p>
+  <code></code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin-core\src\lib\errors.js</h3>
+
+  <span class="todo">
+  <h4>show notification</h4>
+  <br>
+  <p><strong>line</strong>72</p>
+  <code></code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin-core\src\lib\dagchain\dagblock.js</h3>
+
+  <span class="todo">
+  <h4>split into header and block</h4>
+  <br>
+  <p><strong>line</strong>1375</p>
+  <code></code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin-core\src\lib\hd-wallet.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin-core\src\lib\networks.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\src\www\leofcoin-shell.js</h3>
+
+  <span class="todo">
+  <h4> TODO:</h4>
+  <br>
+  <p><strong>line</strong>1130</p>
+  <code></code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\src\www\sections\wallet\wallet.js</h3>
+
+  <span class="todo">
+  <h4>dynamic imports ...</h4>
+  <br>
+  <p><strong>line</strong>83</p>
+  <code></code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\src\www\sections\miner\miner.js</h3>
+
+  <span class="todo">
+  <h4>add max intensity so we dont mine duplicate blocks</h4>
+  <br>
+  <p><strong>line</strong>1974</p>
+  <code>import { define, RenderMixin, CSSMixin } from './../../shared-imports.js';
+import './miner-hashrate.js';
+import './../../extended-fab.js';
+
+export default define(class MinerSection extends RenderMixin(HTMLElement) {
+
+  get hashrate () {
+    return this.shadowRoot.querySelector('miner-hashrate');
+  }
+  get address () {
+    return this.shadowRoot.querySelector('.address');
+  }
+  get intensity () {
+    return this.shadowRoot.querySelector('.intensity');
+  }
+  get afterIntensity () {
+    if (!this._afterIntensity) this._afterIntensity = this.intensity.parentNode.insertBefore(document.createElement('span'), this.intensity)
+    return this._afterIntensity;
+  }
+  get mineButton () {
+    return this.shadowRoot.querySelector('.mine-button');
+  }
+
+  get hasHashrateElement() {
+    return this.hashrate.childElementCount === 1;
+  }
+
+  set mining(value) {
+    if (this._mining !== value) {
+      this._mining = value;
+      this.setAttribute('mining', value);
+      this.observer();
+    }
+  }
+
+  get mining() {
+    return this._mining || false;
+  }
+
+  constructor() {
+    super()
+    this.attachShadow({mode: 'open'});
+
+    this.hashrateChange = this.hashrateChange.bind(this);
+    this.jobCancelled = this.jobCancelled.bind(this);
+    this.mine = this.mine.bind(this);
+// rpc.handle(data => termUI.write(data)))
+    window.bus.on('miner.hashrate', rpc.handle(this.hashrateChange));
+    window.bus.on('miner.job.cancel', rpc.handle(this.jobCancelled));
+    window.bus.on('miner.mining', rpc.handle(this._onMining));
+  }
+
+  _onMining(value) {
+    this.mining = value;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    (async () => {
+      this.cores = await cores();
+      this.config = await getMinerConfig();
+      this.mining = await state('mining');
+      this.address.value = this.config.address;
+      this.intensity.value = this.config.intensity;
+      this.intensity.max = this.cores;
+      // this.afterIntensity.innerHTML = this.config.intensity;
+      // TODO: add max intensity so we dont mine duplicate blocks
+      this.intensity.addEventListener('change', async event => {
+        this.config.intensity = this.intensity.value;
+        // this.afterIntensity.innerHTML = this.intensity.value;
+        await setMinerConfig(this.config)
+        if (this.hasAttribute('mining')) mine(this.config);
+      });
+
+      this.address.addEventListener('change', async event => {
+        this.config.address = this.address.value;
+        await setMinerConfig(this.config)
+        if (this.hasAttribute('mining')) mine(this.config);
+      });
+
+      this.mineButton.addEventListener('click', this.mine);
+    })()
+    // document.addEventListener('hashrate', hashrateChange);
+    // document.addEventListener('job-cancelled', jobCancelled);
+  }
+
+  newHashrateElement(uid) {
+    const el = document.createElement('span')
+    el.setAttribute('uid', uid);
+    this.hashrate.appendChild(el);
+    return el;
+  }
+
+  hashrateChange({hashrate, uid}) {
+    // let hashEl;
+    // if (this.hasHashrateElement) {
+    //   hashEl = this.shadowRoot.querySelector(`[uid="${uid}"]`);
+    //   if (!hashEl) {
+    //     hashEl = this.hasHashrate.firstChild();
+    //     hashrate = hashrate + Number(hashEl.innerHTML.replace(' kH/s', ''));
+    //   }
+    // } else {
+    //   hashEl = this.newHashrateElement(uid)
+    // }
+    // hashEl.innerHTML = `${hashrate} kH/s`;
+    this.hashrate.updateRate(uid, hashrate)
+    // totalHashrate.innerHTML = this.hasHashrate.children.reduce((p, c) => {}, 0)
+  }
+
+  jobCancelled(uid) {
+    const el = this.shadowRoot.querySelector(`[uid="${uid}"]`)
+    if (el) this.hashrate.removeChild(el);
+  }
+
+  observer() {
+    if (this.mining) {
+      this.mineButton.icon = 'stop';
+      this.mineButton.label = 'Stop Mining';
+      this.mineButton.style.background = '#ffa7a7';
+      this.setAttribute('mining', '');
+    } else {
+      this.mineButton.icon = 'play';
+      this.mineButton.label = 'Start Mining';
+      this.mineButton.style.background = 'transparent';
+      this.removeAttribute('mining');
+    }
+  }
+
+  mine() {
+    mine(this.config);
+    this.mining = !this.mining;
+  }
+
+  get template() {
+    return html`
+    <style>
+      :host {
+        display: flex;
+        flex-direction: column !important;
+        height: 100% !important;
+        width: 100%;
+        align-items: normal;
+        pointer-events: none;
+      }
+      .miner-controls {
+        padding: 2em;
+        box-sizing: border-box;
+        position: relative;
+        pointer-events: auto;
+      }
+      .start-button, .stop-button {
+        position: absolute;
+      }
+      .flex {
+        flex: 1;
+      }
+      .row {
+        display: flex;
+        flex-direction: row;
+      }
+      .vertical {
+        display: flex;
+        flex-direction: column;
+      }
+      .vertical-layout {
+        height: 100%;
+        width: 100%;
+      }
+      .center {
+        align-items: center;
+      }
+      input {
+        background: none;
+        color: inherit;
+        border: none;
+        outline: none;
+        width: 320px;
+        text-align: center;
+        pointer-events: auto;
+        cursor: pointer;
+      }
+      .text-align {
+        text-align: center;
+      }
+    </style>
+
+    <span class="vertical text-align">
+      <h3>Current Mining Address</h3>
+      <input class="address"></input>
+      <span class="flex"></span>
+    </span>
+
+    <span class="vertical vertical-layout center">
+      <span class="flex"></span>
+      <h3 title="Amount off cpu cores">Intensity</h3>
+      <input class="intensity" type="range" max="8" min="1" step="1"></input>
+      <miner-hashrate></miner-hashrate>
+      <span class="flex"></span>
+      <span class="miner-controls vertical center">
+        <extended-fab class="mine-button"></extended-fab>
+      </span>
+    </span>
+    `;
+  }
+
+});
+</code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\src\www\sections\explorer\explorer.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\src\www\sections\explorer\explorer-block.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\node_modules\custom-renderer-mixin\src\render-mixin.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\node_modules\backed\src\mixins\css-mixin.js</h3>
+
+  <span class="todo">
+  <h4>test</h4>
+  <br>
+  <p><strong>line</strong>4820</p>
+  <code>/**
+ * @module CSSMixin
+ * @mixin Backed
+ * @param {class} base class to extend from
+ */
+ const mixins = {
+  'mixin(--css-row)': `display: flex;
+        flex-direction: row;
+  `,
+  'mixin(--css-column)': `display: flex;
+        flex-direction: column;
+  `,
+  'mixin(--css-center)': `align-items: center;`,
+  'mixin(--css-header)': `height: 128px;
+        width: 100%;
+        background: var(--primary-color);
+        color: var(--text-color);
+        mixin(--css-column)`,
+  'mixin(--css-flex)': `flex: 1;`,
+  'mixin(--css-flex-2)': `flex: 2;`,
+  'mixin(--css-flex-3)': `flex: 3;`,
+  'mixin(--css-flex-4)': `flex: 4;`,
+  'mixin(--material-palette)': `--dark-primary-color: #00796B;
+        --light-primary-color: #B2DFDB;
+        --primary-color: #009688;
+        --text-color: #FFF;
+        --primary-text-color: #212121;
+        --secondary-text-color: #757575;
+        --divider-color: #BDBDBD;
+        --accent-color: #4CAF50;
+        --disabled-text-color: #BDBDBD;
+        --primary-background-color: #f9ffff;
+        --dialog-background-color: #FFFFFF;`,
+  'mixin(--css-hero)': `display: flex;
+        max-width: 600px;
+        max-height: 340px;
+        height: 100%;
+        width: 100%;
+        box-shadow: 3px 2px 4px 2px rgba(0,0,0, 0.15),
+                    -2px 0px 4px 2px rgba(0,0,0, 0.15);
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 2px;
+  `,
+  'mixin(--css-elevation-2dp)': `
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                0 1px 5px 0 rgba(0, 0, 0, 0.12),
+                0 3px 1px -2px rgba(0, 0, 0, 0.2);`,
+
+  'mixin(--css-elevation-3dp)': `
+    box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.14),
+                0 1px 8px 0 rgba(0, 0, 0, 0.12),
+                0 3px 3px -2px rgba(0, 0, 0, 0.4);`,
+  'mixin(--css-elevation-4dp)': `
+    box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+                0 1px 10px 0 rgba(0, 0, 0, 0.12),
+                0 2px 4px -1px rgba(0, 0, 0, 0.4);`,
+  'mixin(--css-elevation-6dp)': `
+    box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14),
+                0 1px 18px 0 rgba(0, 0, 0, 0.12),
+                0 3px 5px -1px rgba(0, 0, 0, 0.4);`,
+  'mixin(--css-elevation-8dp)': `
+    box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14),
+                0 3px 14px 2px rgba(0, 0, 0, 0.12),
+                0 5px 5px -3px rgba(0, 0, 0, 0.4);`,
+  'mixin(--css-elevation-12dp)': `
+    box-shadow: 0 12px 16px 1px rgba(0, 0, 0, 0.14),
+                0 4px 22px 3px rgba(0, 0, 0, 0.12),
+                0 6px 7px -4px rgba(0, 0, 0, 0.4);`,
+  'mixin(--css-elevation-16dp)': `
+    box-shadow: 0 16px 24px 2px rgba(0, 0, 0, 0.14),
+                0  6px 30px 5px rgba(0, 0, 0, 0.12),
+                0  8px 10px -5px rgba(0, 0, 0, 0.4);`,
+  'mixin(--css-elevation-24dp)': `
+    box-shadow: 0 24px 38px 3px rgba(0, 0, 0, 0.14),
+                0 9px 46px 8px rgba(0, 0, 0, 0.12),
+                0 11px 15px -7px rgba(0, 0, 0, 0.4);`
+ };
+
+ const classes = {
+   'apply(--css-row)': `.row {
+        mixin(--css-row)
+      }
+   `,
+   'apply(--css-column)': `.column {
+        mixin(--css-column)
+      }
+   `,
+   'apply(--css-flex)': `.flex {
+        mixin(--css-flex)
+      }
+   `,
+   'apply(--css-flex-2)': `.flex-2 {
+     mixin(--css-flex-2)
+   }`,
+   'apply(--css-flex-3)': `.flex-3 {
+     mixin(--css-flex-3)
+   }`,
+   'apply(--css-flex-4)': `.flex-4 {
+     mixin(--css-flex-4)
+   }`,
+   'apply(--css-center)': `.center {
+        align-items: center;
+      }
+   `,
+   'apply(--css-center-center)': `.center-center {
+        align-items: center;
+        justify-content: center;
+      }
+   `,
+   'apply(--css-header)': `header, .header {
+     mixin(--css-header)
+   }`,
+   'apply(--css-hero)': `.hero {
+      mixin(--css-hero)
+   }`,
+   'apply(--css-elevation-2dp)': `.elevation-2dp {
+      mixin(--css-elevation-2dp)
+   }`,
+   'apply(--css-elevation-3dp)': `.elevation-3dp {
+      mixin(--css-elevation-3dp)
+   }`,
+   'apply(--css-elevation-4dp)': `.elevation-4dp {
+      mixin(--css-elevation-4dp)
+   }`,
+   'apply(--css-elevation-6dp)': `.elevation-6dp {
+      mixin(--css-elevation-6dp)
+   }`,
+   'apply(--css-elevation-8dp)': `.elevation-8dp {
+      mixin(--css-elevation-8dp)
+   }`,
+   'apply(--css-elevation-12dp)': `.elevation-12dp {
+      mixin(--css-elevation-12dp)
+   }`,
+   'apply(--css-elevation-16dp)': `.elevation-16dp {
+      mixin(--css-elevation-16dp)
+   }`,
+   'apply(--css-elevation-18dp)': `.elevation-18dp {
+      mixin(--css-elevation-18dp)
+   }`
+ }
+export default base => {
+  return class CSSMixin extends base {
+
+    get __style() {
+      return this.shadowRoot.querySelector('style');
+    }
+    constructor() {
+      super();
+    }
+    connectedCallback() {
+      // TODO: test
+      if (super.connectedCallback) super.connectedCallback();
+      // TODO: Implement better way to check if a renderer is used
+      if (this.render) this.hasRenderer = true;
+      else if(this.template) console.log(`Render method undefined ${this.localname}`);
+
+      this._init()
+    }
+    _init() {
+      if (this.hasRenderer) {
+        if (!this.rendered) {
+          return requestAnimationFrame(() => {
+              this._init()
+            });
+        }
+      }
+      const styles = this.shadowRoot ? this.shadowRoot.querySelectorAll('style') : this.querySelectorAll('style');
+      // const matches = style.innerHTML.match(/apply((.*))/g);
+      styles.forEach(style => {
+        this._applyClasses(style.innerHTML).then(innerHTML => {
+          if (innerHTML) this.__style.innerHTML = innerHTML;
+          this._applyMixins(style.innerHTML).then(innerHTML => {
+            if (innerHTML) this.__style.innerHTML = innerHTML;
+          })
+        }).catch(error => {
+          console.error(error);
+        });
+      })
+      // this._applyVariables(matches, style);
+    }
+
+    _applyMixins(string) {
+      const mixinInMixin = string => {
+        if (!string) return console.warn(`Nothing found for ${string}`);
+        const matches = string.match(/mixin((.*))/g);
+        if (matches) {
+          for (const match of matches) {
+            const mixin = mixins[match];
+            string = string.replace(match, mixin)
+          }
+        }
+        return string;
+      }
+      return new Promise((resolve, reject) => {
+        const matches = string.match(/mixin((.*))/g);
+        if (matches) for (const match of matches) {
+          const mixin = mixinInMixin(mixins[match]);
+          string = string.replace(match, mixin);
+          // return [
+          //   match, mixins[match]
+          // ]
+
+        };
+        resolve(string);
+      });
+    }
+
+    _applyClasses(string) {
+      return new Promise((resolve, reject) => {
+        const matches = string.match(/apply((.*))/g);
+        if (matches) for (const match of matches) {
+          // this._applyMixins(classes[match]).then(klass => {
+            string = string.replace(match, classes[match]);
+          // });
+        }
+        // this.style.innerHTML = string;
+        resolve(string);
+      });
+    }
+  }
+}
+</code>
+  </span>
+ 
+  <span class="todo">
+  <h4>Implement better way to check if a renderer is used</h4>
+  <br>
+  <p><strong>line</strong>4904</p>
+  <code>/**
+ * @module CSSMixin
+ * @mixin Backed
+ * @param {class} base class to extend from
+ */
+ const mixins = {
+  'mixin(--css-row)': `display: flex;
+        flex-direction: row;
+  `,
+  'mixin(--css-column)': `display: flex;
+        flex-direction: column;
+  `,
+  'mixin(--css-center)': `align-items: center;`,
+  'mixin(--css-header)': `height: 128px;
+        width: 100%;
+        background: var(--primary-color);
+        color: var(--text-color);
+        mixin(--css-column)`,
+  'mixin(--css-flex)': `flex: 1;`,
+  'mixin(--css-flex-2)': `flex: 2;`,
+  'mixin(--css-flex-3)': `flex: 3;`,
+  'mixin(--css-flex-4)': `flex: 4;`,
+  'mixin(--material-palette)': `--dark-primary-color: #00796B;
+        --light-primary-color: #B2DFDB;
+        --primary-color: #009688;
+        --text-color: #FFF;
+        --primary-text-color: #212121;
+        --secondary-text-color: #757575;
+        --divider-color: #BDBDBD;
+        --accent-color: #4CAF50;
+        --disabled-text-color: #BDBDBD;
+        --primary-background-color: #f9ffff;
+        --dialog-background-color: #FFFFFF;`,
+  'mixin(--css-hero)': `display: flex;
+        max-width: 600px;
+        max-height: 340px;
+        height: 100%;
+        width: 100%;
+        box-shadow: 3px 2px 4px 2px rgba(0,0,0, 0.15),
+                    -2px 0px 4px 2px rgba(0,0,0, 0.15);
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 2px;
+  `,
+  'mixin(--css-elevation-2dp)': `
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                0 1px 5px 0 rgba(0, 0, 0, 0.12),
+                0 3px 1px -2px rgba(0, 0, 0, 0.2);`,
+
+  'mixin(--css-elevation-3dp)': `
+    box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.14),
+                0 1px 8px 0 rgba(0, 0, 0, 0.12),
+                0 3px 3px -2px rgba(0, 0, 0, 0.4);`,
+  'mixin(--css-elevation-4dp)': `
+    box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+                0 1px 10px 0 rgba(0, 0, 0, 0.12),
+                0 2px 4px -1px rgba(0, 0, 0, 0.4);`,
+  'mixin(--css-elevation-6dp)': `
+    box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14),
+                0 1px 18px 0 rgba(0, 0, 0, 0.12),
+                0 3px 5px -1px rgba(0, 0, 0, 0.4);`,
+  'mixin(--css-elevation-8dp)': `
+    box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14),
+                0 3px 14px 2px rgba(0, 0, 0, 0.12),
+                0 5px 5px -3px rgba(0, 0, 0, 0.4);`,
+  'mixin(--css-elevation-12dp)': `
+    box-shadow: 0 12px 16px 1px rgba(0, 0, 0, 0.14),
+                0 4px 22px 3px rgba(0, 0, 0, 0.12),
+                0 6px 7px -4px rgba(0, 0, 0, 0.4);`,
+  'mixin(--css-elevation-16dp)': `
+    box-shadow: 0 16px 24px 2px rgba(0, 0, 0, 0.14),
+                0  6px 30px 5px rgba(0, 0, 0, 0.12),
+                0  8px 10px -5px rgba(0, 0, 0, 0.4);`,
+  'mixin(--css-elevation-24dp)': `
+    box-shadow: 0 24px 38px 3px rgba(0, 0, 0, 0.14),
+                0 9px 46px 8px rgba(0, 0, 0, 0.12),
+                0 11px 15px -7px rgba(0, 0, 0, 0.4);`
+ };
+
+ const classes = {
+   'apply(--css-row)': `.row {
+        mixin(--css-row)
+      }
+   `,
+   'apply(--css-column)': `.column {
+        mixin(--css-column)
+      }
+   `,
+   'apply(--css-flex)': `.flex {
+        mixin(--css-flex)
+      }
+   `,
+   'apply(--css-flex-2)': `.flex-2 {
+     mixin(--css-flex-2)
+   }`,
+   'apply(--css-flex-3)': `.flex-3 {
+     mixin(--css-flex-3)
+   }`,
+   'apply(--css-flex-4)': `.flex-4 {
+     mixin(--css-flex-4)
+   }`,
+   'apply(--css-center)': `.center {
+        align-items: center;
+      }
+   `,
+   'apply(--css-center-center)': `.center-center {
+        align-items: center;
+        justify-content: center;
+      }
+   `,
+   'apply(--css-header)': `header, .header {
+     mixin(--css-header)
+   }`,
+   'apply(--css-hero)': `.hero {
+      mixin(--css-hero)
+   }`,
+   'apply(--css-elevation-2dp)': `.elevation-2dp {
+      mixin(--css-elevation-2dp)
+   }`,
+   'apply(--css-elevation-3dp)': `.elevation-3dp {
+      mixin(--css-elevation-3dp)
+   }`,
+   'apply(--css-elevation-4dp)': `.elevation-4dp {
+      mixin(--css-elevation-4dp)
+   }`,
+   'apply(--css-elevation-6dp)': `.elevation-6dp {
+      mixin(--css-elevation-6dp)
+   }`,
+   'apply(--css-elevation-8dp)': `.elevation-8dp {
+      mixin(--css-elevation-8dp)
+   }`,
+   'apply(--css-elevation-12dp)': `.elevation-12dp {
+      mixin(--css-elevation-12dp)
+   }`,
+   'apply(--css-elevation-16dp)': `.elevation-16dp {
+      mixin(--css-elevation-16dp)
+   }`,
+   'apply(--css-elevation-18dp)': `.elevation-18dp {
+      mixin(--css-elevation-18dp)
+   }`
+ }
+export default base => {
+  return class CSSMixin extends base {
+
+    get __style() {
+      return this.shadowRoot.querySelector('style');
+    }
+    constructor() {
+      super();
+    }
+    connectedCallback() {
+      // TODO: test
+      if (super.connectedCallback) super.connectedCallback();
+      // TODO: Implement better way to check if a renderer is used
+      if (this.render) this.hasRenderer = true;
+      else if(this.template) console.log(`Render method undefined ${this.localname}`);
+
+      this._init()
+    }
+    _init() {
+      if (this.hasRenderer) {
+        if (!this.rendered) {
+          return requestAnimationFrame(() => {
+              this._init()
+            });
+        }
+      }
+      const styles = this.shadowRoot ? this.shadowRoot.querySelectorAll('style') : this.querySelectorAll('style');
+      // const matches = style.innerHTML.match(/apply((.*))/g);
+      styles.forEach(style => {
+        this._applyClasses(style.innerHTML).then(innerHTML => {
+          if (innerHTML) this.__style.innerHTML = innerHTML;
+          this._applyMixins(style.innerHTML).then(innerHTML => {
+            if (innerHTML) this.__style.innerHTML = innerHTML;
+          })
+        }).catch(error => {
+          console.error(error);
+        });
+      })
+      // this._applyVariables(matches, style);
+    }
+
+    _applyMixins(string) {
+      const mixinInMixin = string => {
+        if (!string) return console.warn(`Nothing found for ${string}`);
+        const matches = string.match(/mixin((.*))/g);
+        if (matches) {
+          for (const match of matches) {
+            const mixin = mixins[match];
+            string = string.replace(match, mixin)
+          }
+        }
+        return string;
+      }
+      return new Promise((resolve, reject) => {
+        const matches = string.match(/mixin((.*))/g);
+        if (matches) for (const match of matches) {
+          const mixin = mixinInMixin(mixins[match]);
+          string = string.replace(match, mixin);
+          // return [
+          //   match, mixins[match]
+          // ]
+
+        };
+        resolve(string);
+      });
+    }
+
+    _applyClasses(string) {
+      return new Promise((resolve, reject) => {
+        const matches = string.match(/apply((.*))/g);
+        if (matches) for (const match of matches) {
+          // this._applyMixins(classes[match]).then(klass => {
+            string = string.replace(match, classes[match]);
+          // });
+        }
+        // this.style.innerHTML = string;
+        resolve(string);
+      });
+    }
+  }
+}
+</code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\node_modules\custom-svg-icon\custom-svg-icon.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\node_modules\custom-svg-iconset\custom-svg-iconset.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\src\www\sections\wallet\wallet-loader.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\src\www\sections\wallet\wallet-accounts.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\src\www\sections\wallet\wallet-transactions.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\src\www\sections\wallet\wallet-send.js</h3>
+
+  <span class="todo">
+  <h4>push result to mempool</h4>
+  <br>
+  <p><strong>line</strong>2020</p>
+  <code>export default define(class WalletSend extends PropertyMixin(RenderMixin(CSSMixin(HTMLElement))) {
+  static get properties() {
+    return merge(super.properties, {})
+  }
+
+  set payto(value) {
+    this.shadowRoot.querySelector('#payto').value = value
+  }
+
+  set amount(value) {
+    this.shadowRoot.querySelector('#amount').value = value
+  }
+
+  get paywith() {
+    return [window.address, ...window.account];
+  }
+
+  get payto() {
+    return this.shadowRoot.querySelector('#payto').value
+  }
+
+  get amount() {
+    return this.shadowRoot.querySelector('#amount').value
+  }
+  get _sendButton() {
+    return this.shadowRoot.querySelector('.send-button')
+  }
+  constructor() {
+    super();
+    this.send = this.send.bind(this)
+    this.cancel = this.cancel.bind(this)
+    this.attachShadow({mode: 'open'})
+  }
+
+  connectedCallback(){
+    super.connectedCallback()
+    this._sendButton.addEventListener('click', this.send)
+    this.shadowRoot.querySelector('.cancel-button').addEventListener('click', this.cancel)
+  }
+
+  cancel() {
+    this.paywith = null;
+    this.payto = null;
+    this.amount = null;
+  }
+
+  async validate(paywith, payto, amount) {
+    if (!paywith || !payto || !amount) throw Error('Are you sure you filled in everything?')
+    // when payto address lenght is lower than or same as 24
+    // we assume its an address name
+    if (payto.length < 24) {
+      const accounts = window.store.contacts;
+      for (const acc of accounts) {
+        if (acc[0] === payto) {
+          payto = acc[1]
+        }
+      }
+    }
+    if (paywith.length < 34 || payto.length < 34) throw Error('invalid address')
+    return {paywith, payto, amount};
+  }
+
+  async send() {
+    await state('ready', true);
+    if (this.paywith && this.payto && this.amount) {
+      // TODO: push result to mempool
+      try {
+        const result = await this.validate(this.paywith[0], this.payto, this.amount)
+        const sended = await send({
+          to: this.payto,
+          from: this.paywith,
+          amount: this.amount,
+          message: this.message
+        })
+      } catch (e) {
+        alert(e.message)
+      }
+      return;
+    }
+    alert('Are you sure you filled in everything?');
+  }
+
+   get template() {
+    return html`
+    <style>
+      :host {
+        display: flex;
+        flex-direction: column;
+        color: #ddd;
+      }
+
+      .send {
+        padding: 2em;
+      }
+      input, textarea {
+        /* padding: 0.6em; */
+        border: none;
+        outline: none;
+        background: rgba(225,225,225,0.1);
+        color: #ddd;
+      }
+      input {
+        font-size: 20px;
+        height: 40px;
+        text-align: center;
+        border-radius: 14px;
+      }
+      textarea#statement {
+        font-size: 18px;
+        height: calc(40px * 3);
+        padding: 6px 12px;
+        border-radius: 14px;
+        overflow: hidden;
+      }
+      .item {
+        mixin(--css-column)
+        /* align-items: flex-end; */
+        box-sizing: border-box;
+        padding: 8px 16px;
+      }
+
+      h4 {
+        margin: 0;
+        padding: 0 12px 12px 0;
+      }
+
+      button {
+        border: none;
+        user-select: none;
+        border-radius: 24px;
+        height: 40px;
+        width: 124px;
+        background: transparent;
+        user-select: none;
+        outline: none;
+        text-transform: uppercase;
+        color: #ddd;
+        cursor: pointer;
+      }
+
+      button:hover {
+        box-shadow: var(--shadow-elevation-3dp);
+        transition: box-shadow 96ms ease-in;
+      }
+
+      button:active {
+        box-shadow: var(--shadow-elevation-0dp);
+        transition: box-shadow 96ms ease-out;
+      }
+
+      input {
+        color: #ddd;
+      }
+      .row {
+        mixin(--css-row)
+        align-items: center;
+      }
+      .lfc {
+        padding: 0 0 0 12px;
+      }
+      apply(--css-flex)
+      apply(--css-flex-2)
+
+      [disabled] {
+        pointer-events: none;
+        color: #eee;
+      }
+    </style>
+    <span class="row">
+      <span class="item">
+        <h4>SEND</h4>
+        <span class="row">
+          <input id="amount" type="text" autocomplete="off" placeholder="150" tabindex="1"></input>
+        </span>
+      </span>
+      <span class="item">
+        <span class="flex">
+          <h4>TO</h4>
+          <input id="payto" type="text" autocomplete="on" placeholder="address/contact" tabindex="2"></input>
+        </span>
+      </span>
+    </span>
+    <span class="flex"></span>
+    <span class="item">
+      <h4 for="statement">STATEMENT (optional)</h4>
+      <textarea id="statement" placeholder="some words" tabindex="3"></textarea>
+    </span>
+    <span class="flex-2"></span>
+    <span class="row">
+      <custom-button class="cancel-button" tabindex="5">cancel</custom-button>
+      <span class="flex"></span>
+      <custom-button class="send-button" tabindex="4">send</custom-button>
+    </span>
+    `;
+  }
+});</code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\src\www\sections\explorer\explorer-block-view.js</h3>
+
+  <span class="todo">
+  <h4>improve timeTillNextBlock</h4>
+  <br>
+  <p><strong>line</strong>1693</p>
+  <code>import { define, RenderMixin, PropertyMixin, merge } from './../../shared-imports.js';
+
+export default define(class ExplorerBlockView extends RenderMixin(PropertyMixin(HTMLElement)) {
+  static get properties() {
+    return merge(super.properties, {
+      index: {
+        // observer: 'ob'
+        value: '__'
+      },
+      prevHash: {
+        // observer: 'ob'
+        value: '__'
+      },
+      hash: {
+        // observer: 'ob'
+        value: '__'
+      },
+      time: {
+        // observer: 'ob'
+        value: '__'
+      },
+      transactionVolume: {
+        // observer: 'ob'
+        value: '__'
+      },
+      outputAmount: {
+        // observer: 'ob'
+        value: '__'
+      },
+      nextHash: {
+        // observer: 'ob'
+        value: '__'
+      },
+      difficulty: {
+        // observer: 'ob'
+        value: '__'
+      },
+      date: {
+        value: ''
+      },
+      blockReward: {
+        value: 0
+      },
+      transactionLength: {
+        value: 0
+      },
+      transactionsString: {
+        value: ''
+      },
+      blockSize: {
+        value: 0
+      }
+    })
+  }
+  constructor() {
+    super();
+    this.attachShadow({mode: 'open'})
+    this.onHashClick = this.onHashClick.bind(this)
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+  }
+
+  async onHashClick(event) {
+    const data = await block(event.path[0].innerHTML)
+    document.dispatchEvent(new CustomEvent(`show-block`, { detail: data }));
+  }
+  /**
+   * @param {object} block {index, prevHash, hash, transactions, time}
+   */
+  stamp(block, next) {
+    Object.keys(block).forEach(property => {
+      this[property] = block[property]
+    });
+    if (next) this.nextHash = next.hash;
+    else {
+      // TODO: improve timeTillNextBlock
+      let timeTillNextBlock = 10;
+      setInterval(() => {
+        timeTillNextBlock--;
+
+        this.nextHash = `approximate time till next block ${timeTillNextBlock}s`;
+      }, 1000);
+    }
+    this.date = new Date(this.time * 1000).toString()
+    this.inputs = this.transactions.reduce((inputs, tx) => inputs.concat(tx.inputs), []);
+
+  	// Find all outputs with their tx ids
+  	this.outputs = this.transactions.reduce((outputs, tx) =>
+  		outputs.concat(tx.outputs.map(output => Object.assign({}, output, {tx: tx.id}))), []);
+
+  	// Figure out which outputs are unspent
+  	this.unspent = this.outputs.filter(output =>
+  		typeof this.inputs.find(input => input.tx === output.tx && input.index === output.index && input.amount === output.amount) === 'undefined');
+
+    this.outputAmount = this.outputs.reduce((amount, o) => amount + o.amount, 0);
+    this.transactionVolume = String(this.outputAmount - this.unspent.reduce((amount, o) => Number(amount) + o.amount, 0));
+
+    const getDifficulty = hash => {
+    	return parseInt(hash.substring(0, 8), 16);
+    };
+    this.difficulty = getDifficulty(block.hash)
+
+    this.blockReward = this.transactions.reduce((p, tx) => {
+      if (tx.reward) return tx.outputs[0].amount;
+      else return p;
+    }, 0)
+
+    const o = {};
+    this.blockSize = block.size;
+    this.transactionLength = `<strong>transactions</strong><span class="flex"></span>${this.transactions.length}`;
+    // this.transactions.reduce((p, c) => {}, initial)
+    this.transactionsString = this.transactions.map(tx => {
+      // console.log(tx.inputs);
+      const un = tx.inputs.reduce((p, c) => {
+        if (p[c.address]) {
+          p[c.address].amount += c.amount;
+        } else p[c.address] = c;
+        return p;
+      }, {})
+      tx.inputs = Object.values(un)
+      tx.inputs = [...(new Set(tx.inputs))]
+      if (tx.reward) return `
+
+        <span class="ti vertical">
+          <span class="row">
+            <strong>ID</strong>
+            <span class="flex"></span>
+            <span class="id">${tx.id}</span>
+          </span>
+          <span class="row">
+            No Inputs(new mined coins)
+            <span class="flex-3"></span>
+            &#x21E8;
+            <span class="flex-3"></span>
+            <a>${tx.outputs[0].address}</a>
+            <span class="flex"></span>
+            <p><strong>${tx.outputs[0].amount}</strong> LFC</p>
+          </span>
+        </span>`;
+
+      else return `
+      <span class="ti vertical">
+        <span class="row">
+          <strong>ID</strong>
+          <span class="flex"></span>
+          <span class="id">${tx.id}</span>
+        </span>
+        <span class="row">
+        <span class="column">
+        ${tx.inputs.map(i => `
+          <a>${i.address}</a>
+        `).join(' ')}
+        </span>
+        <span class="flex-3"></span>
+        &#x21E8;
+        <span class="flex-3"></span>
+          <span class="vertical">
+          ${tx.outputs.map(o => `
+            <span class="row">
+              <a>${o.address}</a>
+              <span class="flex"></span>
+              <p><strong>${o.amount}</strong> LFC</p>
+            </span>
+          `).join(' ')}
+          </span>
+        </span>
+      </span>
+      `
+    }).join(' ');
+    Object.keys(this.properties).forEach(k => o[k] = this[k] || '')
+    this.render(o);
+
+    if (!this.links) {
+      const links = this.shadowRoot.querySelectorAll('.link');
+      for (var i = 0; i < links.length; i++) {
+        links[i].onclick = this.onHashClick
+      }
+      this.links = links;
+    }
+  }
+  get template() {
+    return html`
+      <style>
+        :host {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          overflow-y: auto;
+          /* color: #555; */
+          cursor: default;
+          background: #fff;
+          position: relative;
+          padding-top: 24px;
+        }
+        summary {
+          line-height: 24px;
+          font-family: 'ROBOTO-LIGHT', sans-serif;
+          font-size: 15px;
+          text-rendering: optimizeLegibility;
+          box-shadow: var(--shadow-elevation-2dp);
+          margin-bottom: 24px;
+          width: 840px;
+        }
+        .flex {
+          flex: 1;
+        }
+        .flex-2 {
+          flex: 2;
+        }
+        .flex-3 {
+          flex: 3;
+        }
+        .ti {
+          display: flex;
+          padding: 8px 16px;
+          box-sizing: border-box;
+        }
+        summary .ti:nth-of-type(odd) {
+          background: #eee;
+        }
+        h4, h3, p {
+          margin: 0;
+        }
+        h3, h4 {
+          padding: 8px 16px 12px 16px;
+          width: 840px;
+          box-sizing: border-box;
+        }
+        ::slotted(header) {
+          height: 32px;
+        }
+        .row, .vertical {
+          display: flex;
+        }
+        .vertical {
+          flex-direction: column;
+        }
+        .row {
+          flex-direction: row;
+        }
+        .spacing {
+          display: flex;
+          padding: 0 2px;
+        }
+        a {
+          display: flex;
+          padding-right: 18px;
+        }
+        .link {
+          padding: 0;
+          pointer-events: auto;
+          cursor: pointer;
+        }
+      </style>
+      <slot name="toolbar"></slot>
+      <h3>block #<span>${'index'}</span></h3>
+
+      <summary class="info">
+        <p class="ti"><strong>time</strong><span class="flex"></span><span>${'date'}</span></p>
+        <p class="ti">${'transactionLength'}</p>
+        <p class="ti"><strong>transaction output</strong><span class="flex"></span><span>${'outputAmount'}</span><span class="spacing"></span> LFC</p>
+        <p class="ti"><strong>transaction output volume</strong><span class="flex"></span><span>${'transactionVolume'}</span><span class="spacing"></span> LFC</p>
+        <p class="ti"><strong>Fees</strong><span class="flex"></span>0 LFC</p>
+        <p class="ti"><strong>difficulty</strong><span class="flex"></span><span>${'difficulty'}</span></p>
+        <p class="ti"><strong>block size</strong><span class="flex"></span><span>${'blockSize'}</span><span class="spacing"></span> bytes</p>
+        <p class="ti"><strong>block reward</strong><span class="flex"></span><span>${'blockReward'}</span><span class="spacing"></span> LFC</p>
+      </summary>
+
+      <h4>hashes</h4>
+      <summary class="hashes">
+        <p class="ti"><strong>hash</strong><span class="flex"></span><span>${'hash'}</span></p>
+        <p class="ti"><strong>previous</strong><span class="flex"></span><a class="link">${'prevHash'}</a></p>
+        <p class="ti"><strong>next</strong><span class="flex"></span><a class="link">${'nextHash'}</a></p>
+      </summary>
+
+      <h4>transactions</h4>
+      <summary class="transactions">
+        ${'transactionsString'}
+      </summary>
+    `;
+  }
+});
+</code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\node_modules\custom-html-tag\src\html.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\node_modules\custom-select-mixins\src\select-mixin.js</h3>
+
+  <span class="todo">
+  <h4>fix selectedobservers</h4>
+  <br>
+  <p><strong>line</strong>1540</p>
+  <code>'use strict';
+import PropertyMixin from '../../backed/src/mixins/property-mixin.js';
+import merge from '../../backed/src/utils/merge.js';
+
+export default base => {
+  return class SelectMixin extends PropertyMixin(base) {
+
+    static get properties() {
+      return merge(super.properties, {
+        selected: {
+          value: 0,
+          observer: '__selectedObserver__'
+        }
+      });
+    }
+
+    constructor() {
+      super();
+    }
+
+    get slotted() {
+      return this.shadowRoot ? this.shadowRoot.querySelector('slot') : this;
+    }
+
+    get _assignedNodes() {
+      const nodes = 'assignedNodes' in this.slotted ? this.slotted.assignedNodes() : this.children
+      const arr = []
+      for (var i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        if (node.nodeType === 1) arr.push(node);
+      }
+      return arr;
+    }
+
+    /**
+    * @return {String}
+    */
+    get attrForSelected() {
+      return this.getAttribute('attr-for-selected') || 'name';
+    }
+
+    set attrForSelected(value) {
+      this.setAttribute('attr-for-selected', value);
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+      if (oldValue !== newValue) {
+        // check if value is number
+        if (!isNaN(newValue)) {
+          newValue = Number(newValue);
+        }
+        this[name] = newValue;
+      }
+    }
+
+    /**
+     * @param {string|number|HTMLElement} selected
+     */
+    select(selected) {
+      if (selected) this.selected = selected;
+      // TODO: fix selectedobservers
+      if (this.multi) this.__selectedObserver__()
+    }
+
+    next(string) {
+      const index = this.getIndexFor(this.currentSelected);
+      if (index !== -1 && index >= 0 && this._assignedNodes.length > index &&
+          (index + 1) <= this._assignedNodes.length - 1) {
+        this.selected = this._assignedNodes[index + 1]
+      }
+    }
+
+    previous() {
+      const index = this.getIndexFor(this.currentSelected);
+      if (index !== -1 && index >= 0 && this._assignedNodes.length > index &&
+          (index - 1) >= 0) {
+        this.selected = this._assignedNodes[index - 1]
+      }
+    }
+
+    getIndexFor(element) {
+      if (element && element instanceof HTMLElement === false)
+        return console.error(`${element} is not an instanceof HTMLElement`);
+
+      return this._assignedNodes.indexOf(element || this.selected);
+    }
+
+    _updateSelected(selected) {
+      selected.classList.add('custom-selected');
+      if (this.currentSelected && this.currentSelected !== selected) {
+        this.currentSelected.classList.remove('custom-selected');
+      }
+      this.currentSelected = selected;
+    }
+
+    /**
+     * @param {string|number|HTMLElement} change.value
+     */
+    __selectedObserver__(value) {
+      const type = typeof this.selected;
+      if (Array.isArray(this.selected)) {
+        for (const child of this._assignedNodes) {
+          if (child.nodeType === 1) {
+            if (this.selected.indexOf(child.getAttribute(this.attrForSelected)) !== -1) {
+              child.classList.add('custom-selected');
+            } else {
+              child.classList.remove('custom-selected');
+            }
+          }
+        }
+        return;
+      } else if (type === 'object') return this._updateSelected(this.selected);
+      else if (type === 'string') {
+        for (const child of this._assignedNodes) {
+          if (child.nodeType === 1) {
+            if (child.getAttribute(this.attrForSelected) === this.selected) {
+              return this._updateSelected(child);
+            }
+          }
+        }
+      } else {
+        // set selected by index
+        const child = this._assignedNodes[this.selected];
+        if (child && child.nodeType === 1) this._updateSelected(child);
+        // remove selected even when nothing found, better to return nothing
+      }
+    }
+  }
+}
+</code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\node_modules\backed\src\utils\merge.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\node_modules\backed\src\mixins\property-mixin.js</h3>
+
+  <span class="todo">
+  <h4>Create & add global observer</h4>
+  <br>
+  <p><strong>line</strong>169</p>
+  <code></code>
+  </span>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\node_modules\custom-select-mixins\src\selector-mixin.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\src\www\api.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\src\www\sections\wallet\wallet-account.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\node_modules\custom-button\custom-button.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\src\www\sections\explorer\explorer-list-view.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\node_modules\backed\src\utils\slugify.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\node_modules\backed\src\utils\replace-accents.js</h3>
+
+ 
+<h3>C:\Workspace\leofcoin\leofcoin\node_modules\custom-util\index.js</h3>
+
+
+  </body>
+</html>

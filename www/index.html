@@ -1,0 +1,85 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Leofcoin</title>
+  </head>
+  <script>
+    const run = async () => {
+      const [app, bus] = await carlo.loadParams();
+      window.bus = bus;
+      console.log('o');
+      const script = (src, onload, type) => {
+        if (typeof onload === 'string') {
+          type = onload;
+          onload = null;
+        }
+        const script = document.createElement('script');
+        if (type) script.type = type;
+        if (onload) script.onload = onload;
+        script.src = src;
+        document.head.appendChild(script);
+      }
+      script('./iconset.js', () => {
+        script('./splash-screen.js', 'module')
+        script('./leofcoin-shell.js', () => {
+          const shell = document.querySelector('leofcoin-shell')
+          bus.on('block-added', rpc.handle(shell._onBlockAdded));
+        }, 'module')
+      }, 'module')
+    }
+  </script>
+  <style media="screen">
+    html, body {
+      margin: 0;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      overflow: hidden;
+      position: absolute;
+      font-family: 'Roboto-Condensed', 'Noto', sans-serif;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    body {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 20px;
+
+      --header-height: 48px;
+      --shadow-elevation-0dp:
+                    0 0px 0px 0 rgba(0, 0, 0, 0.14),
+                    0 0px 0px 0 rgba(0, 0, 0, 0.12),
+                    0 0px 0px 0px rgba(0, 0, 0, 0.2);
+      --shadow-elevation-2dp:
+                    0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                    0 1px 5px 0 rgba(0, 0, 0, 0.12),
+                    0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      --shadow-elevation-3dp:
+                    0 3px 4px 0 rgba(0, 0, 0, 0.14),
+                    0 1px 8px 0 rgba(0, 0, 0, 0.12),
+                    0 3px 3px -2px rgba(0, 0, 0, 0.4);
+      --shadow-elevation-4dp:
+                    0 4px 5px 0 rgba(0, 0, 0, 0.14),
+                    0 1px 10px 0 rgba(0, 0, 0, 0.12),
+                    0 2px 4px -1px rgba(0, 0, 0, 0.4);
+      --shadow-elevation-6dp:
+                    0 6px 10px 0 rgba(0, 0, 0, 0.14),
+                    0 1px 18px 0 rgba(0, 0, 0, 0.12),
+                    0 3px 5px -1px rgba(0, 0, 0, 0.4);
+      --shadow-elevation-8dp:
+                    0 8px 10px 1px rgba(0, 0, 0, 0.14),
+                    0 3px 14px 2px rgba(0, 0, 0, 0.12),
+                    0 5px 5px -3px rgba(0, 0, 0, 0.4);
+    }
+    h1, h2, h3, h4 {
+      margin: 0;
+    }
+  </style>
+  <body onload="run()">
+<!-- <body> -->
+    <leofcoin-iconset></leofcoin-iconset>
+    <splash-screen></splash-screen>
+    <leofcoin-shell></leofcoin-shell>
+  </body>
+</html>
