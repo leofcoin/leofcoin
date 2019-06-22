@@ -1,5 +1,9 @@
 'use strict';
 
+let LeofcoinStorage;
+let QRCode;
+let Ipfs;
+
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var EventEmitter = _interopDefault(require('events'));

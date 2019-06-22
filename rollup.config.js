@@ -3,6 +3,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import cjs from 'rollup-plugin-commonjs';
 import json from 'rollup-plugin-json';
 import todo from 'rollup-plugin-todo';
+import modify from 'rollup-plugin-modify';
 import { spawn } from 'child_process';
 import del from 'del';
 
@@ -13,13 +14,25 @@ export default [{
   input: ['src/leofcoin.js', 'src/bus.js'],
   output: {
     dir: './',
-    format: 'cjs'
+    format: 'cjs',
+    intro: 'let LeofcoinStorage;\nlet QRCode;\nlet Ipfs;'
   },
 	experimentalCodeSplitting: true,
   treeshake: true,
   plugins: [
-    todo(),
     json(),
+    todo(),
+		modify({
+	    STORAGE_IMPORT: `new Promise((resolve, reject) => {
+	      if (!LeofcoinStorage) LeofcoinStorage = require('lfc-storage');
+	      resolve()
+	    });`,				
+      QRCODE_IMPORT: `if (!QRCode) QRCode = require('qrcode');`,
+      IPFS_IMPORT: `new Promise((resolve, reject) => {
+        if (!Ipfs) Ipfs = require('ipfs');
+        resolve()
+      })`
+		}),
     // cjs(),
     // resolve(),
     cleanup()
@@ -39,8 +52,8 @@ export default [{
 	experimentalCodeSplitting: true,
   treeshake: true,
 	plugins: [
-    todo(),
     json(),
+    todo(),
     cjs(),
     resolve()
   ]

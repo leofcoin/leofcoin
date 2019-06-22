@@ -3,7 +3,7 @@ import { homedir } from 'os';
 import { join } from 'path';
 import { rpc, rpc_process } from 'carlo/rpc';
 import { addresses, state, createWallet, accounts, accountNames, balance, balanceAfter, send, getMinerConfig, setMinerConfig, block, blocks, transactions, mine, chain, on } from './../../../leofcoin-core/src/api';
-import {core} from './../../../leofcoin-core/src/core.js';
+import core from './../../../leofcoin-core/src/core.js';
 import cores from 'physical-cpu-count';
 
 const userDataDir = join(homedir(), '.leofcoin');
@@ -19,9 +19,10 @@ const busPath = join(__dirname, 'bus.js');
     userDataDir,
     title: 'leofcoin',
     domain: 'leofcoin.org',
-    channel: ['stable', 'canary', 'chromium'],
+    // channel: ['stable', 'canary', 'chromium'],
     ignoreDefaultArgs: ['--disable-extensions']
   });
+  console.log('before');
   core();
   app.serveFolder(join(__dirname , 'www'));
 
