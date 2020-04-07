@@ -126,7 +126,6 @@ export default define(class ExplorerBlockView extends RenderMixin(PropertyMixin(
         <span class="ti vertical">
           <span class="row">
             <strong>ID</strong>
-            <span class="flex"></span>
             <span class="id">${tx.id}</span>
           </span>
           <span class="row">

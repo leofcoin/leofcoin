@@ -13,14 +13,7 @@ window.store = {
 };
 
 window.showNotification = async (title, body = null) => {
-  const permission = await Notification.requestPermission();
-  if (permission === "granted") {
-
-    new Notification(title, {icon: '/assets/leofcoin_96.png', badge: '/assets/leofcoin_96.png', body}).onclick = (ev) => {
-      ev.preventDefault();
-      console.log(ev)
-    }
-  }
+    new Notification(title, {icon: '/assets/leofcoin_96.png', badge: '/assets/leofcoin_96.png', body})
 }
 
 
@@ -61,23 +54,24 @@ export default define(class leofcoinShell extends CSSMixin(RenderMixin(HTMLEleme
   }
 
   stampTransactions(transactions) {
-    return transactions.map(({amount, tx, address, index}) => `tx: ${tx ? tx : index}\n\taddress: ${address}\n\tamount: ${amount}\n`).join(' ');
+    return transactions.map(({amount, address, index}) => `tx: ${tx ? tx : index}\n\taddress: ${address}\n\tamount: ${amount}\n`).join(' ');
   }
 
-  _onBlockAdded(block) {
-    console.log({block});
+  async _onBlockAdded(block) {
     for (const address of window.store.addresses) {
-      for (const {inputs, outputs} of block.transactions) {
-        console.log(inputs, outputs);
+      const _transactions = []
+      for (const {multihash} of block.transactions) {
+        const tx = await transaction(multihash)
+        _transactions.push(tx)
+      }
+      for (const {inputs, outputs, reward} of _transactions) {
         const slicedHash = window.sliceHash(block.hash);
-        console.log(slicedHash);
         const transactionsOut = [];
         const transactionsIn = [];
         let amountOut = 0;
         let amountIn = 0;
 
         for (const tx of inputs) {
-          console.log(tx);
           if (tx.address === address) {
             transactionsOut.push(tx);
             amountOut += tx.amount;
@@ -88,24 +82,9 @@ export default define(class leofcoinShell extends CSSMixin(RenderMixin(HTMLEleme
           if (tx.address === address) {
             transactionsIn.push(tx);
             amountIn += tx.amount;
-            if (tx.reward === true) showNotification(`mined block: ${block.index}`, slicedHash);
+            if (reward) showNotification(`mined block: ${block.index}`, slicedHash);
           }
         }
-
-        console.log(amountIn);
-        if (amountIn && amountOut) {
-          return showNotification(`sended & received [${amountOut}/${amountIn}]`, `received:\n\t${this.stampTransactions(transactionsIn)}\nsended:\n\t${this.stampTransactions(transactionsOut)}`)
-        }
-        if (amountIn) {
-          return showNotification(`incoming transactions [${amountIn}]`, `received:\n\t${this.stampTransactions(transactionsIn)}`);
-        }
-
-        if (amountOut) {
-          return showNotification(`incoming transactions [${amountOut}]`, `received:\n\t${this.stampTransactions(transactionsOut)}`);
-        }
-
-
-        return showNotification(`outgoing transactions: ${block.hash.slice((block.hash.length - 7), block.hash.length)}`, amount)
       }
     }
     // TODO:

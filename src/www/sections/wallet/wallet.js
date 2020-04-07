@@ -7,6 +7,7 @@ import './wallet-accounts';
 import './wallet-transactions';
 import './wallet-name-input';
 import './wallet-send';
+import './wallet-receive';
 import '../../nav-bar'
 import '../../custom-fab';
 // import socketRequestClient from '../../../node_modules/socket-request-client/src/index';
@@ -40,7 +41,9 @@ export default define(class WalletSection extends RenderMixin(CSSMixin(HTMLEleme
     (async () => {
       try {
         // TODO: await addresses() --> accounts()
+        console.log('a');
         console.log(await addresses());
+        console.log('z');
         this.accounts = await addresses();
         if (this.accounts) {
           this._extendedFab.label = 'create account';
@@ -97,6 +100,7 @@ export default define(class WalletSection extends RenderMixin(CSSMixin(HTMLEleme
   }
 
   async createWallet() {
+    console.log('w');
     const result = await createWallet();
     console.log(result.mnemonic);
     alert(`Wallet generated\nplease note mnemonic down\nnote, losing results in an unrecoverable wallet\n\n${result.mnemonic}`)
@@ -225,6 +229,7 @@ export default define(class WalletSection extends RenderMixin(CSSMixin(HTMLEleme
         <custom-pages class="wallet" attr-for-selected="data-route">
 
           <wallet-send data-route="send" class="hero"></wallet-send>
+          <wallet-receive data-route="receive" class="hero"></wallet-receive>
 
           <wallet-transactions data-route="transactions" class="hero"></wallet-transactions>
         </custom-pages>

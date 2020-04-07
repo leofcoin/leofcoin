@@ -21,7 +21,7 @@ export default define(class WalletAddressBalance extends HTMLElement {
     (async () => {
       this.innerHTML = String(value);
 
-      const block = await blocks(1, true);
+      const block = await block();
       this.setAttribute('chain-index', block[0].index);
     })()
   }

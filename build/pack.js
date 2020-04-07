@@ -14,11 +14,8 @@ const simpleInno = require('simple-inno-setup-script');
   const supportURL = _package.bugs.url;
   const updatesURL = _package.homepage;
   const publisherURL = _package.homepage;
-  try {
-    const script = await read(join(__dirname, 'win', 'leofcoin-setup.iss'));
-  } catch (error) {
-console.log(error)
-    if (error.code === 'ENOENT') {
+  
+  
       const result = await simpleInno({
       name,
       version,
@@ -29,27 +26,46 @@ console.log(error)
         publisherURL
       },
       outputDir: '../',
-      sourceDir: "../executables/leofcoin-win-x64.exe",
-      sourceDirX86: "../executables/leofcoin-win-x86.exe",
+      sourceDir: "../executables/leofcoin-x64.exe",
+      sourceDirX86: "../executables/leofcoin-x86.exe",
       vbsPath: '../../node_modules/simple-inno-setup-script/templates/vbs.vbs',
       signTool: false,
-      include: ['Source: "../../node_modules/go-ipfs-dep/go-ipfs/ipfs.exe"; DestDir: "{pf}/leofcoin";']
+      include: [
+        'Source: "../../node_modules/ipfs/node_modules/leveldown/prebuilds/win32-x64/node.napi.node"; DestDir: "{pf}/leofcoin/prebuilds/win32-x64";\n',
+        'Source: "../../node_modules/leveldown/prebuilds/android-arm/node.napi.armv7.node"; DestDir: "{pf}/leofcoin";'
+      ]
     });
     await result.write(__dirname + '/win/leofcoin-setup.iss', result.script);
+  
+  const options = {
+    main: 'leofcoin.js',
+    assets: ['www', 'node_modules/ipfs/node_modules/leveldown/**/*', 'node_modules/lfc-storage/**/*'],
+    output: 'build/executables',
+    verbose: true,
+    winExe: {
+      scripts: 'build/win/leofcoin-setup.iss'
     }
   }
   try {
-    await pack({
-      main: 'leofcoin.js',
-      targets: ['node10-win-x64', 'node10-win-x86', 'node10-linux-x64', 'node10-linux-x86', 'node10-macos-x64', 'node10-macos-x86'],
-      assets: 'www',
-      output: 'build/executables',
-      verbose: true,
-      winExe: {
-        scripts: 'build/win/leofcoin-setup.iss'
-      }
-    })
+    options.targets = ['node12-win-x64', 'node12-win-x86']
+    await pack(options)
   } catch (e) {
     console.error(e);
+  }
+  
+  try {
+    options.targets = ['node12-linux-x64', 'node12-linux-x86']
+    options.output = 'build/executables/linux'
+    await pack(options)
+  } catch (e) {
+    console.error(e)
+  }
+  
+  try {
+    options.targets = ['node12-macos-x64', 'node12-macos-x86']
+    options.output = 'build/executables/mac'
+    await pack(options)    
+  } catch (e) {
+    console.error(e)
   }
 })()
