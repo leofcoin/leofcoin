@@ -202,14 +202,14 @@
   <span class="todo">
   <h4>consider using candidates for validating</h4>
   <br>
-  <p><strong>line</strong>8706</p>
+  <p><strong>line</strong>8746</p>
   <code></code>
   </span>
  
   <span class="todo">
   <h4> previousBlock = chain[chain.length - 1]; </h4><p> TODO: await lastBlock</p>
   <br>
-  <p><strong>line</strong>9887</p>
+  <p><strong>line</strong>9927</p>
   <code></code>
   </span>
 
@@ -452,21 +452,21 @@ export default class Miner extends StoreHandler {
   <span class="todo">
   <h4>create bootstrap according peer reputation ...</h4>
   <br>
-  <p><strong>line</strong>389</p>
+  <p><strong>line</strong>349</p>
   <code></code>
   </span>
  
   <span class="todo">
   <h4>ignore address after 5 times</h4>
   <br>
-  <p><strong>line</strong>2497</p>
+  <p><strong>line</strong>2457</p>
   <code></code>
   </span>
  
   <span class="todo">
   <h4>filter using peerrep</h4>
   <br>
-  <p><strong>line</strong>3349</p>
+  <p><strong>line</strong>3309</p>
   <code></code>
   </span>
 
@@ -476,7 +476,7 @@ export default class Miner extends StoreHandler {
   <span class="todo">
   <h4>finishe the genesis module</h4>
   <br>
-  <p><strong>line</strong>1551</p>
+  <p><strong>line</strong>1511</p>
   <code>export class DAGChain extends EventEmitter {
   constructor({genesis, ipfs}) {
     super();
@@ -524,158 +524,13 @@ export default class Miner extends StoreHandler {
     return await this.ipfs.pin.add(multihash, {recursive: true});
   }
 
-  /**
-   * resolves to the latest chainObject
-   */
-  async sync() {
-    try {
-      const { hash } = await longestChain();
-      console.log(hash);
-      console.log('hello');
-      this.currentBlockHash = hash || await localDAGMultiaddress();
-      leofcoin.currentBlockNode = await this.get(this.currentBlockHash);
-      console.log({currentBlockNode});
-      console.log('hello');
-      leofcoin.currentBlockNode = new LFCNode(leofcoin.currentBlockNode)
-      log(`current block hash : ${this.currentBlockHash}`);
-      log(`chain size: ${Math.round(Number(leofcoin.currentBlockNode.size) * 1e-6 * 100) / 100} Mb (${leofcoin.currentBlockNode.size} bytes)`);
-      return this.currentBlockHash
-    } catch (e) {
-      throw e
-    }
-  }
-  
-  async resolveBlock(node) {
-    const prevHash = node.prevHash
-    node = await this.get(prevHash)
-    node = new LFCNode(node)
-    return node
-  }
-
-  async resolveBlocks(node, index) {
-    const cid = await util.cid(node.serialize())
-    chain[node.index] = node.toJSON();
-    chain[node.index].hash = cid.toBaseEncodedString()
-    leofcoin.hashMap.set(node.index, cid.toBaseEncodedString())
-    debug(`loaded block: ${node.index} - ${chain[node.index].hash}`);
-    if (node.prevHash !== Buffer.alloc(47).toString('hex')) {
-      // console.log((node.index - index) > 2);
-      // if ((node.index - 10) > 2) {
-      //   const arr = []
-      //   for (var i = 0; i < 2; i++) {
-      //     arr.push(leofcoin.request('blockHash', (node.index - i)))
-      //   }
-      //   console.log(arr);
-      //   const hashes = await Promise.all(arr);      
-      //   console.log(hashes);
-      //   try {
-      //     const blocks = await Promise.all(hashes.map(hash => this.get(hash)))
-      //     console.log(blocks);node = blocks.reduce((p, c) => {
-      //       if (c.index < p.index) {
-      //         if (c.index > index) debug(`added block: ${c.index}`);
-      //         return c
-      //       }
-      //       return p
-      //     })
-      //     node = new LFCNode(node)
-      //   } catch (e) {
-      //     console.error(e);
-      //   } finally {
-      // 
-      //   }
-      // } else {
-        node = await this.resolveBlock(node)
-        if (node.index > index) {
-          debug(`added block: ${node.index}`);
-        }
-      // }
-      try {
-        // store them in memory
-        // global.blockHashSet[hash] = block.index;
-        if (node.prevHash && node.prevHash !== Buffer.alloc(47).toString('hex')) {
-  
-          return this.resolveBlocks(node, index);
-        }
-        return;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return
-  }
-
   async syncChain() {
-    try {
       global.states.syncing = true;
       bus.emit('syncing', true);
-      console.log('syn');
-      await leofcoin.chain.sync();
-      console.log('sunc');
-      debug(leofcoin.currentBlockNode.toString())
-      if (leofcoin.currentBlockNode) {
-        const { index, multihash } = await this.localBlock();
-        debug(`local block index: ${index}`)
-        const height = leofcoin.currentBlockNode.index
-        let syncCount = height - index;
-        debug(`local chain height: ${index}`);
-        debug(`network chain height: ${height}`);
-        debug(`syncing ${syncCount > 0 ? syncCount : 0} block(s)`)
-        
-        
-        // whenever prevHash is undefined & syncCount is zero or lower
-        // write latest network chain to locals
-        const start = Date.now();
-        if (index > height) {
-          const value = await this.get(multihash)
-          await this.resolveBlocks(new LFCNode(value), index);
-        }
-        else await this.resolveBlocks(leofcoin.currentBlockNode, index);
-        const end = Date.now();
-        const time = end - start;
-        debug(time / 1000);
-        if (syncCount > 0) {
-          await this.updateLocals(leofcoin.currentBlockHash, height);
-        }
-      } else {
-        chain[0] = GENESISBLOCK
-        chain[0].index = 0;
-        chain[0].hash = genesisCID;
-      }
-    } catch (e) {
-      chain[0] = GENESISBLOCK
-      chain[0].index = 0;
-      chain[0].hash = genesisCID;
-      await this.updateLocals(genesisCID, 0)
-      console.error('syncChain', e);
-    }
+      await leofcoin.chain.resync()
+      bus.emit('syncing', false)
+      global.states.syncing = false;
     return;
-  }
-
-  async localBlock() {
-    try {
-      let multihash = await read(localCurrent, 'string'); // read local chain state
-      const current = await this.get(multihash);
-      const node = new LFCNode(current)
-      
-      // probably recovering local chain
-      if (node.index === undefined) {
-        index = 0;
-        debug(`invalid block detected, recovering local chain`);
-        await write(localCurrent, genesisCID);
-        return await this.localBlock();
-      } else {        
-        debug(`current local block: ${multihash}`);
-      }
-      return {
-        index: node.index,
-        multihash
-      }
-    } catch (e) {
-      console.log(e);
-      // await write(localCurrent, encode(Buffer.from(genesisCID, 'hex')));
-      await write(localCurrent, genesisCID);
-      return await this.localBlock();
-    }
   }
 
   async loadChain() {
@@ -712,7 +567,7 @@ export default class Miner extends StoreHandler {
         bus.emit('block-added', block);
         debug(`updating current local block: ${multihash}`)
 
-        await this.updateLocals(multihash, block.index);
+        await leofcoin.chain.updateLocals(multihash, block.index);
         try {
           debug(`pinning: ${multihash}`);
           await this.pin('/ipfs/' + multihash)
@@ -744,22 +599,6 @@ export default class Miner extends StoreHandler {
   }
 
   /**
-   * last resolved, mined or minted block
-   *
-   * @param {object} cid - cid instance or baseEncodedString 
-   */
-  async updateLocals(cid, index) {
-    if (cid.isCid && cid.isCid()) cid = cid.toBaseEncodedString();
-    
-    try {
-      await this.writeLocals(cid, index);
-    } catch (error) {
-      await this.writeLocals(cid, index);
-    }
-      
-  }
-
-  /**
    * Initialize a new chain on the IPFS network
    * Creates creates & saves the genesisBlock to IPFS, blocks are pinned so they aren't removeable on the local side.
    *
@@ -770,8 +609,8 @@ export default class Miner extends StoreHandler {
   async newDAGChain() {
     try {
       const genesisBlock = await newGenesisDAGNode(difficulty());
-      const cid = await this.ipfs.dag.put(genesisBlock, { format: 'leofcoin-block', hashAlg: util.defaultHashAlg, version: 1, multibaseName: 'base58btc', pin: true});
-      await this.updateLocals(cid.toBaseEncodedString(), 0);
+      const cid = await ipfs.dag.put(genesisBlock, { format: 'leofcoin-block', hashAlg: util.defaultHashAlg, version: 1, multibaseName: 'base58btc', pin: true});
+      await leofcoin.chain.updateLocals(cid.toBaseEncodedString(), 0);
       
       succes('genesisBlock created');
       log(`genesisBlock: ${genesisBlock.toString()}`);
@@ -793,10 +632,7 @@ export default class Miner extends StoreHandler {
   }
   
   async resync(block) {
-    const node = new LFCNode(block)
-    const index = chain[chain.length - 1]
-    
-    await this.resolveBlocks(node, index)
+    await leofcoin.chain.resync()
   }
 
   // TODO: go with previous block instead off lastBlock
@@ -806,7 +642,7 @@ export default class Miner extends StoreHandler {
       const block = JSON.parse(data.toString());
       if (chain[block.index]) {
         bus.emit('invalid-block', block);
-        await this.ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
+        await ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
         return
       }
       try {
@@ -816,7 +652,7 @@ export default class Miner extends StoreHandler {
       } catch (error) {
         // TODO: remove publish invalid-block
         bus.emit('invalid-block', block);
-        await this.ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
+        await ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
         await this.resync(block)
         return
       }
@@ -827,8 +663,33 @@ export default class Miner extends StoreHandler {
   <span class="todo">
   <h4>blockHashSet</h4>
   <br>
-  <p><strong>line</strong>8237</p>
-  <code>rror) {
+  <p><strong>line</strong>3314</p>
+  <code>export class DAGChain extends EventEmitter {
+  constructor({genesis, ipfs}) {
+    super();
+    this.announceBlock = this.announceBlock.bind(this);
+    this.announceTransaction = this.announceTransaction.bind(this);
+
+    this.chain = chain;
+    this.ipfs = ipfs;
+    
+    globalThis.resolveBlocks = this.resolveBlocks
+  }
+
+  async init(genesis) {
+    await this.ipfs.pubsub.subscribe('block-added', this.announceBlock);
+    await this.ipfs.pubsub.subscribe('announce-transaction', this.announceTransaction);
+    await this.ipfs.pubsub.subscribe('invalid-transaction', invalidTransaction);
+    log(`Running on the ${network} network`);
+        // TODO: finishe the genesis module
+    if (genesis) {
+      log(`Creating genesis block on the ${network} network`);
+      await this.newDAGChain();
+    }
+
+    try {
+      if (!genesis) await this.loadChain();
+    } catch (error) {
       debug(error)
       return error
     }
@@ -850,158 +711,13 @@ export default class Miner extends StoreHandler {
     return await this.ipfs.pin.add(multihash, {recursive: true});
   }
 
-  /**
-   * resolves to the latest chainObject
-   */
-  async sync() {
-    try {
-      const { hash } = await longestChain();
-      console.log(hash);
-      console.log('hello');
-      this.currentBlockHash = hash || await localDAGMultiaddress();
-      leofcoin.currentBlockNode = await this.get(this.currentBlockHash);
-      console.log({currentBlockNode});
-      console.log('hello');
-      leofcoin.currentBlockNode = new LFCNode(leofcoin.currentBlockNode)
-      log(`current block hash : ${this.currentBlockHash}`);
-      log(`chain size: ${Math.round(Number(leofcoin.currentBlockNode.size) * 1e-6 * 100) / 100} Mb (${leofcoin.currentBlockNode.size} bytes)`);
-      return this.currentBlockHash
-    } catch (e) {
-      throw e
-    }
-  }
-  
-  async resolveBlock(node) {
-    const prevHash = node.prevHash
-    node = await this.get(prevHash)
-    node = new LFCNode(node)
-    return node
-  }
-
-  async resolveBlocks(node, index) {
-    const cid = await util.cid(node.serialize())
-    chain[node.index] = node.toJSON();
-    chain[node.index].hash = cid.toBaseEncodedString()
-    leofcoin.hashMap.set(node.index, cid.toBaseEncodedString())
-    debug(`loaded block: ${node.index} - ${chain[node.index].hash}`);
-    if (node.prevHash !== Buffer.alloc(47).toString('hex')) {
-      // console.log((node.index - index) > 2);
-      // if ((node.index - 10) > 2) {
-      //   const arr = []
-      //   for (var i = 0; i < 2; i++) {
-      //     arr.push(leofcoin.request('blockHash', (node.index - i)))
-      //   }
-      //   console.log(arr);
-      //   const hashes = await Promise.all(arr);      
-      //   console.log(hashes);
-      //   try {
-      //     const blocks = await Promise.all(hashes.map(hash => this.get(hash)))
-      //     console.log(blocks);node = blocks.reduce((p, c) => {
-      //       if (c.index < p.index) {
-      //         if (c.index > index) debug(`added block: ${c.index}`);
-      //         return c
-      //       }
-      //       return p
-      //     })
-      //     node = new LFCNode(node)
-      //   } catch (e) {
-      //     console.error(e);
-      //   } finally {
-      // 
-      //   }
-      // } else {
-        node = await this.resolveBlock(node)
-        if (node.index > index) {
-          debug(`added block: ${node.index}`);
-        }
-      // }
-      try {
-        // store them in memory
-        // global.blockHashSet[hash] = block.index;
-        if (node.prevHash && node.prevHash !== Buffer.alloc(47).toString('hex')) {
-  
-          return this.resolveBlocks(node, index);
-        }
-        return;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return
-  }
-
   async syncChain() {
-    try {
       global.states.syncing = true;
       bus.emit('syncing', true);
-      console.log('syn');
-      await leofcoin.chain.sync();
-      console.log('sunc');
-      debug(leofcoin.currentBlockNode.toString())
-      if (leofcoin.currentBlockNode) {
-        const { index, multihash } = await this.localBlock();
-        debug(`local block index: ${index}`)
-        const height = leofcoin.currentBlockNode.index
-        let syncCount = height - index;
-        debug(`local chain height: ${index}`);
-        debug(`network chain height: ${height}`);
-        debug(`syncing ${syncCount > 0 ? syncCount : 0} block(s)`)
-        
-        
-        // whenever prevHash is undefined & syncCount is zero or lower
-        // write latest network chain to locals
-        const start = Date.now();
-        if (index > height) {
-          const value = await this.get(multihash)
-          await this.resolveBlocks(new LFCNode(value), index);
-        }
-        else await this.resolveBlocks(leofcoin.currentBlockNode, index);
-        const end = Date.now();
-        const time = end - start;
-        debug(time / 1000);
-        if (syncCount > 0) {
-          await this.updateLocals(leofcoin.currentBlockHash, height);
-        }
-      } else {
-        chain[0] = GENESISBLOCK
-        chain[0].index = 0;
-        chain[0].hash = genesisCID;
-      }
-    } catch (e) {
-      chain[0] = GENESISBLOCK
-      chain[0].index = 0;
-      chain[0].hash = genesisCID;
-      await this.updateLocals(genesisCID, 0)
-      console.error('syncChain', e);
-    }
+      await leofcoin.chain.resync()
+      bus.emit('syncing', false)
+      global.states.syncing = false;
     return;
-  }
-
-  async localBlock() {
-    try {
-      let multihash = await read(localCurrent, 'string'); // read local chain state
-      const current = await this.get(multihash);
-      const node = new LFCNode(current)
-      
-      // probably recovering local chain
-      if (node.index === undefined) {
-        index = 0;
-        debug(`invalid block detected, recovering local chain`);
-        await write(localCurrent, genesisCID);
-        return await this.localBlock();
-      } else {        
-        debug(`current local block: ${multihash}`);
-      }
-      return {
-        index: node.index,
-        multihash
-      }
-    } catch (e) {
-      console.log(e);
-      // await write(localCurrent, encode(Buffer.from(genesisCID, 'hex')));
-      await write(localCurrent, genesisCID);
-      return await this.localBlock();
-    }
   }
 
   async loadChain() {
@@ -1038,7 +754,7 @@ export default class Miner extends StoreHandler {
         bus.emit('block-added', block);
         debug(`updating current local block: ${multihash}`)
 
-        await this.updateLocals(multihash, block.index);
+        await leofcoin.chain.updateLocals(multihash, block.index);
         try {
           debug(`pinning: ${multihash}`);
           await this.pin('/ipfs/' + multihash)
@@ -1070,22 +786,6 @@ export default class Miner extends StoreHandler {
   }
 
   /**
-   * last resolved, mined or minted block
-   *
-   * @param {object} cid - cid instance or baseEncodedString 
-   */
-  async updateLocals(cid, index) {
-    if (cid.isCid && cid.isCid()) cid = cid.toBaseEncodedString();
-    
-    try {
-      await this.writeLocals(cid, index);
-    } catch (error) {
-      await this.writeLocals(cid, index);
-    }
-      
-  }
-
-  /**
    * Initialize a new chain on the IPFS network
    * Creates creates & saves the genesisBlock to IPFS, blocks are pinned so they aren't removeable on the local side.
    *
@@ -1096,8 +796,8 @@ export default class Miner extends StoreHandler {
   async newDAGChain() {
     try {
       const genesisBlock = await newGenesisDAGNode(difficulty());
-      const cid = await this.ipfs.dag.put(genesisBlock, { format: 'leofcoin-block', hashAlg: util.defaultHashAlg, version: 1, multibaseName: 'base58btc', pin: true});
-      await this.updateLocals(cid.toBaseEncodedString(), 0);
+      const cid = await ipfs.dag.put(genesisBlock, { format: 'leofcoin-block', hashAlg: util.defaultHashAlg, version: 1, multibaseName: 'base58btc', pin: true});
+      await leofcoin.chain.updateLocals(cid.toBaseEncodedString(), 0);
       
       succes('genesisBlock created');
       log(`genesisBlock: ${genesisBlock.toString()}`);
@@ -1119,10 +819,7 @@ export default class Miner extends StoreHandler {
   }
   
   async resync(block) {
-    const node = new LFCNode(block)
-    const index = chain[chain.length - 1]
-    
-    await this.resolveBlocks(node, index)
+    await leofcoin.chain.resync()
   }
 
   // TODO: go with previous block instead off lastBlock
@@ -1132,7 +829,7 @@ export default class Miner extends StoreHandler {
       const block = JSON.parse(data.toString());
       if (chain[block.index]) {
         bus.emit('invalid-block', block);
-        await this.ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
+        await ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
         return
       }
       try {
@@ -1142,7 +839,7 @@ export default class Miner extends StoreHandler {
       } catch (error) {
         // TODO: remove publish invalid-block
         bus.emit('invalid-block', block);
-        await this.ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
+        await ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
         await this.resync(block)
         return
       }
@@ -1153,8 +850,33 @@ export default class Miner extends StoreHandler {
   <span class="todo">
   <h4>write using ipfs.files.write</h4>
   <br>
-  <p><strong>line</strong>9452</p>
-  <code>rror) {
+  <p><strong>line</strong>4539</p>
+  <code>export class DAGChain extends EventEmitter {
+  constructor({genesis, ipfs}) {
+    super();
+    this.announceBlock = this.announceBlock.bind(this);
+    this.announceTransaction = this.announceTransaction.bind(this);
+
+    this.chain = chain;
+    this.ipfs = ipfs;
+    
+    globalThis.resolveBlocks = this.resolveBlocks
+  }
+
+  async init(genesis) {
+    await this.ipfs.pubsub.subscribe('block-added', this.announceBlock);
+    await this.ipfs.pubsub.subscribe('announce-transaction', this.announceTransaction);
+    await this.ipfs.pubsub.subscribe('invalid-transaction', invalidTransaction);
+    log(`Running on the ${network} network`);
+        // TODO: finishe the genesis module
+    if (genesis) {
+      log(`Creating genesis block on the ${network} network`);
+      await this.newDAGChain();
+    }
+
+    try {
+      if (!genesis) await this.loadChain();
+    } catch (error) {
       debug(error)
       return error
     }
@@ -1176,158 +898,13 @@ export default class Miner extends StoreHandler {
     return await this.ipfs.pin.add(multihash, {recursive: true});
   }
 
-  /**
-   * resolves to the latest chainObject
-   */
-  async sync() {
-    try {
-      const { hash } = await longestChain();
-      console.log(hash);
-      console.log('hello');
-      this.currentBlockHash = hash || await localDAGMultiaddress();
-      leofcoin.currentBlockNode = await this.get(this.currentBlockHash);
-      console.log({currentBlockNode});
-      console.log('hello');
-      leofcoin.currentBlockNode = new LFCNode(leofcoin.currentBlockNode)
-      log(`current block hash : ${this.currentBlockHash}`);
-      log(`chain size: ${Math.round(Number(leofcoin.currentBlockNode.size) * 1e-6 * 100) / 100} Mb (${leofcoin.currentBlockNode.size} bytes)`);
-      return this.currentBlockHash
-    } catch (e) {
-      throw e
-    }
-  }
-  
-  async resolveBlock(node) {
-    const prevHash = node.prevHash
-    node = await this.get(prevHash)
-    node = new LFCNode(node)
-    return node
-  }
-
-  async resolveBlocks(node, index) {
-    const cid = await util.cid(node.serialize())
-    chain[node.index] = node.toJSON();
-    chain[node.index].hash = cid.toBaseEncodedString()
-    leofcoin.hashMap.set(node.index, cid.toBaseEncodedString())
-    debug(`loaded block: ${node.index} - ${chain[node.index].hash}`);
-    if (node.prevHash !== Buffer.alloc(47).toString('hex')) {
-      // console.log((node.index - index) > 2);
-      // if ((node.index - 10) > 2) {
-      //   const arr = []
-      //   for (var i = 0; i < 2; i++) {
-      //     arr.push(leofcoin.request('blockHash', (node.index - i)))
-      //   }
-      //   console.log(arr);
-      //   const hashes = await Promise.all(arr);      
-      //   console.log(hashes);
-      //   try {
-      //     const blocks = await Promise.all(hashes.map(hash => this.get(hash)))
-      //     console.log(blocks);node = blocks.reduce((p, c) => {
-      //       if (c.index < p.index) {
-      //         if (c.index > index) debug(`added block: ${c.index}`);
-      //         return c
-      //       }
-      //       return p
-      //     })
-      //     node = new LFCNode(node)
-      //   } catch (e) {
-      //     console.error(e);
-      //   } finally {
-      // 
-      //   }
-      // } else {
-        node = await this.resolveBlock(node)
-        if (node.index > index) {
-          debug(`added block: ${node.index}`);
-        }
-      // }
-      try {
-        // store them in memory
-        // global.blockHashSet[hash] = block.index;
-        if (node.prevHash && node.prevHash !== Buffer.alloc(47).toString('hex')) {
-  
-          return this.resolveBlocks(node, index);
-        }
-        return;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return
-  }
-
   async syncChain() {
-    try {
       global.states.syncing = true;
       bus.emit('syncing', true);
-      console.log('syn');
-      await leofcoin.chain.sync();
-      console.log('sunc');
-      debug(leofcoin.currentBlockNode.toString())
-      if (leofcoin.currentBlockNode) {
-        const { index, multihash } = await this.localBlock();
-        debug(`local block index: ${index}`)
-        const height = leofcoin.currentBlockNode.index
-        let syncCount = height - index;
-        debug(`local chain height: ${index}`);
-        debug(`network chain height: ${height}`);
-        debug(`syncing ${syncCount > 0 ? syncCount : 0} block(s)`)
-        
-        
-        // whenever prevHash is undefined & syncCount is zero or lower
-        // write latest network chain to locals
-        const start = Date.now();
-        if (index > height) {
-          const value = await this.get(multihash)
-          await this.resolveBlocks(new LFCNode(value), index);
-        }
-        else await this.resolveBlocks(leofcoin.currentBlockNode, index);
-        const end = Date.now();
-        const time = end - start;
-        debug(time / 1000);
-        if (syncCount > 0) {
-          await this.updateLocals(leofcoin.currentBlockHash, height);
-        }
-      } else {
-        chain[0] = GENESISBLOCK
-        chain[0].index = 0;
-        chain[0].hash = genesisCID;
-      }
-    } catch (e) {
-      chain[0] = GENESISBLOCK
-      chain[0].index = 0;
-      chain[0].hash = genesisCID;
-      await this.updateLocals(genesisCID, 0)
-      console.error('syncChain', e);
-    }
+      await leofcoin.chain.resync()
+      bus.emit('syncing', false)
+      global.states.syncing = false;
     return;
-  }
-
-  async localBlock() {
-    try {
-      let multihash = await read(localCurrent, 'string'); // read local chain state
-      const current = await this.get(multihash);
-      const node = new LFCNode(current)
-      
-      // probably recovering local chain
-      if (node.index === undefined) {
-        index = 0;
-        debug(`invalid block detected, recovering local chain`);
-        await write(localCurrent, genesisCID);
-        return await this.localBlock();
-      } else {        
-        debug(`current local block: ${multihash}`);
-      }
-      return {
-        index: node.index,
-        multihash
-      }
-    } catch (e) {
-      console.log(e);
-      // await write(localCurrent, encode(Buffer.from(genesisCID, 'hex')));
-      await write(localCurrent, genesisCID);
-      return await this.localBlock();
-    }
   }
 
   async loadChain() {
@@ -1364,7 +941,7 @@ export default class Miner extends StoreHandler {
         bus.emit('block-added', block);
         debug(`updating current local block: ${multihash}`)
 
-        await this.updateLocals(multihash, block.index);
+        await leofcoin.chain.updateLocals(multihash, block.index);
         try {
           debug(`pinning: ${multihash}`);
           await this.pin('/ipfs/' + multihash)
@@ -1396,22 +973,6 @@ export default class Miner extends StoreHandler {
   }
 
   /**
-   * last resolved, mined or minted block
-   *
-   * @param {object} cid - cid instance or baseEncodedString 
-   */
-  async updateLocals(cid, index) {
-    if (cid.isCid && cid.isCid()) cid = cid.toBaseEncodedString();
-    
-    try {
-      await this.writeLocals(cid, index);
-    } catch (error) {
-      await this.writeLocals(cid, index);
-    }
-      
-  }
-
-  /**
    * Initialize a new chain on the IPFS network
    * Creates creates & saves the genesisBlock to IPFS, blocks are pinned so they aren't removeable on the local side.
    *
@@ -1422,8 +983,8 @@ export default class Miner extends StoreHandler {
   async newDAGChain() {
     try {
       const genesisBlock = await newGenesisDAGNode(difficulty());
-      const cid = await this.ipfs.dag.put(genesisBlock, { format: 'leofcoin-block', hashAlg: util.defaultHashAlg, version: 1, multibaseName: 'base58btc', pin: true});
-      await this.updateLocals(cid.toBaseEncodedString(), 0);
+      const cid = await ipfs.dag.put(genesisBlock, { format: 'leofcoin-block', hashAlg: util.defaultHashAlg, version: 1, multibaseName: 'base58btc', pin: true});
+      await leofcoin.chain.updateLocals(cid.toBaseEncodedString(), 0);
       
       succes('genesisBlock created');
       log(`genesisBlock: ${genesisBlock.toString()}`);
@@ -1445,10 +1006,7 @@ export default class Miner extends StoreHandler {
   }
   
   async resync(block) {
-    const node = new LFCNode(block)
-    const index = chain[chain.length - 1]
-    
-    await this.resolveBlocks(node, index)
+    await leofcoin.chain.resync()
   }
 
   // TODO: go with previous block instead off lastBlock
@@ -1458,7 +1016,7 @@ export default class Miner extends StoreHandler {
       const block = JSON.parse(data.toString());
       if (chain[block.index]) {
         bus.emit('invalid-block', block);
-        await this.ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
+        await ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
         return
       }
       try {
@@ -1468,7 +1026,7 @@ export default class Miner extends StoreHandler {
       } catch (error) {
         // TODO: remove publish invalid-block
         bus.emit('invalid-block', block);
-        await this.ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
+        await ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
         await this.resync(block)
         return
       }
@@ -1479,8 +1037,33 @@ export default class Miner extends StoreHandler {
   <span class="todo">
   <h4>switch to itx</h4>
   <br>
-  <p><strong>line</strong>10584</p>
-  <code>rror) {
+  <p><strong>line</strong>5299</p>
+  <code>export class DAGChain extends EventEmitter {
+  constructor({genesis, ipfs}) {
+    super();
+    this.announceBlock = this.announceBlock.bind(this);
+    this.announceTransaction = this.announceTransaction.bind(this);
+
+    this.chain = chain;
+    this.ipfs = ipfs;
+    
+    globalThis.resolveBlocks = this.resolveBlocks
+  }
+
+  async init(genesis) {
+    await this.ipfs.pubsub.subscribe('block-added', this.announceBlock);
+    await this.ipfs.pubsub.subscribe('announce-transaction', this.announceTransaction);
+    await this.ipfs.pubsub.subscribe('invalid-transaction', invalidTransaction);
+    log(`Running on the ${network} network`);
+        // TODO: finishe the genesis module
+    if (genesis) {
+      log(`Creating genesis block on the ${network} network`);
+      await this.newDAGChain();
+    }
+
+    try {
+      if (!genesis) await this.loadChain();
+    } catch (error) {
       debug(error)
       return error
     }
@@ -1502,158 +1085,13 @@ export default class Miner extends StoreHandler {
     return await this.ipfs.pin.add(multihash, {recursive: true});
   }
 
-  /**
-   * resolves to the latest chainObject
-   */
-  async sync() {
-    try {
-      const { hash } = await longestChain();
-      console.log(hash);
-      console.log('hello');
-      this.currentBlockHash = hash || await localDAGMultiaddress();
-      leofcoin.currentBlockNode = await this.get(this.currentBlockHash);
-      console.log({currentBlockNode});
-      console.log('hello');
-      leofcoin.currentBlockNode = new LFCNode(leofcoin.currentBlockNode)
-      log(`current block hash : ${this.currentBlockHash}`);
-      log(`chain size: ${Math.round(Number(leofcoin.currentBlockNode.size) * 1e-6 * 100) / 100} Mb (${leofcoin.currentBlockNode.size} bytes)`);
-      return this.currentBlockHash
-    } catch (e) {
-      throw e
-    }
-  }
-  
-  async resolveBlock(node) {
-    const prevHash = node.prevHash
-    node = await this.get(prevHash)
-    node = new LFCNode(node)
-    return node
-  }
-
-  async resolveBlocks(node, index) {
-    const cid = await util.cid(node.serialize())
-    chain[node.index] = node.toJSON();
-    chain[node.index].hash = cid.toBaseEncodedString()
-    leofcoin.hashMap.set(node.index, cid.toBaseEncodedString())
-    debug(`loaded block: ${node.index} - ${chain[node.index].hash}`);
-    if (node.prevHash !== Buffer.alloc(47).toString('hex')) {
-      // console.log((node.index - index) > 2);
-      // if ((node.index - 10) > 2) {
-      //   const arr = []
-      //   for (var i = 0; i < 2; i++) {
-      //     arr.push(leofcoin.request('blockHash', (node.index - i)))
-      //   }
-      //   console.log(arr);
-      //   const hashes = await Promise.all(arr);      
-      //   console.log(hashes);
-      //   try {
-      //     const blocks = await Promise.all(hashes.map(hash => this.get(hash)))
-      //     console.log(blocks);node = blocks.reduce((p, c) => {
-      //       if (c.index < p.index) {
-      //         if (c.index > index) debug(`added block: ${c.index}`);
-      //         return c
-      //       }
-      //       return p
-      //     })
-      //     node = new LFCNode(node)
-      //   } catch (e) {
-      //     console.error(e);
-      //   } finally {
-      // 
-      //   }
-      // } else {
-        node = await this.resolveBlock(node)
-        if (node.index > index) {
-          debug(`added block: ${node.index}`);
-        }
-      // }
-      try {
-        // store them in memory
-        // global.blockHashSet[hash] = block.index;
-        if (node.prevHash && node.prevHash !== Buffer.alloc(47).toString('hex')) {
-  
-          return this.resolveBlocks(node, index);
-        }
-        return;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return
-  }
-
   async syncChain() {
-    try {
       global.states.syncing = true;
       bus.emit('syncing', true);
-      console.log('syn');
-      await leofcoin.chain.sync();
-      console.log('sunc');
-      debug(leofcoin.currentBlockNode.toString())
-      if (leofcoin.currentBlockNode) {
-        const { index, multihash } = await this.localBlock();
-        debug(`local block index: ${index}`)
-        const height = leofcoin.currentBlockNode.index
-        let syncCount = height - index;
-        debug(`local chain height: ${index}`);
-        debug(`network chain height: ${height}`);
-        debug(`syncing ${syncCount > 0 ? syncCount : 0} block(s)`)
-        
-        
-        // whenever prevHash is undefined & syncCount is zero or lower
-        // write latest network chain to locals
-        const start = Date.now();
-        if (index > height) {
-          const value = await this.get(multihash)
-          await this.resolveBlocks(new LFCNode(value), index);
-        }
-        else await this.resolveBlocks(leofcoin.currentBlockNode, index);
-        const end = Date.now();
-        const time = end - start;
-        debug(time / 1000);
-        if (syncCount > 0) {
-          await this.updateLocals(leofcoin.currentBlockHash, height);
-        }
-      } else {
-        chain[0] = GENESISBLOCK
-        chain[0].index = 0;
-        chain[0].hash = genesisCID;
-      }
-    } catch (e) {
-      chain[0] = GENESISBLOCK
-      chain[0].index = 0;
-      chain[0].hash = genesisCID;
-      await this.updateLocals(genesisCID, 0)
-      console.error('syncChain', e);
-    }
+      await leofcoin.chain.resync()
+      bus.emit('syncing', false)
+      global.states.syncing = false;
     return;
-  }
-
-  async localBlock() {
-    try {
-      let multihash = await read(localCurrent, 'string'); // read local chain state
-      const current = await this.get(multihash);
-      const node = new LFCNode(current)
-      
-      // probably recovering local chain
-      if (node.index === undefined) {
-        index = 0;
-        debug(`invalid block detected, recovering local chain`);
-        await write(localCurrent, genesisCID);
-        return await this.localBlock();
-      } else {        
-        debug(`current local block: ${multihash}`);
-      }
-      return {
-        index: node.index,
-        multihash
-      }
-    } catch (e) {
-      console.log(e);
-      // await write(localCurrent, encode(Buffer.from(genesisCID, 'hex')));
-      await write(localCurrent, genesisCID);
-      return await this.localBlock();
-    }
   }
 
   async loadChain() {
@@ -1690,7 +1128,7 @@ export default class Miner extends StoreHandler {
         bus.emit('block-added', block);
         debug(`updating current local block: ${multihash}`)
 
-        await this.updateLocals(multihash, block.index);
+        await leofcoin.chain.updateLocals(multihash, block.index);
         try {
           debug(`pinning: ${multihash}`);
           await this.pin('/ipfs/' + multihash)
@@ -1722,22 +1160,6 @@ export default class Miner extends StoreHandler {
   }
 
   /**
-   * last resolved, mined or minted block
-   *
-   * @param {object} cid - cid instance or baseEncodedString 
-   */
-  async updateLocals(cid, index) {
-    if (cid.isCid && cid.isCid()) cid = cid.toBaseEncodedString();
-    
-    try {
-      await this.writeLocals(cid, index);
-    } catch (error) {
-      await this.writeLocals(cid, index);
-    }
-      
-  }
-
-  /**
    * Initialize a new chain on the IPFS network
    * Creates creates & saves the genesisBlock to IPFS, blocks are pinned so they aren't removeable on the local side.
    *
@@ -1748,8 +1170,8 @@ export default class Miner extends StoreHandler {
   async newDAGChain() {
     try {
       const genesisBlock = await newGenesisDAGNode(difficulty());
-      const cid = await this.ipfs.dag.put(genesisBlock, { format: 'leofcoin-block', hashAlg: util.defaultHashAlg, version: 1, multibaseName: 'base58btc', pin: true});
-      await this.updateLocals(cid.toBaseEncodedString(), 0);
+      const cid = await ipfs.dag.put(genesisBlock, { format: 'leofcoin-block', hashAlg: util.defaultHashAlg, version: 1, multibaseName: 'base58btc', pin: true});
+      await leofcoin.chain.updateLocals(cid.toBaseEncodedString(), 0);
       
       succes('genesisBlock created');
       log(`genesisBlock: ${genesisBlock.toString()}`);
@@ -1771,10 +1193,7 @@ export default class Miner extends StoreHandler {
   }
   
   async resync(block) {
-    const node = new LFCNode(block)
-    const index = chain[chain.length - 1]
-    
-    await this.resolveBlocks(node, index)
+    await leofcoin.chain.resync()
   }
 
   // TODO: go with previous block instead off lastBlock
@@ -1784,7 +1203,7 @@ export default class Miner extends StoreHandler {
       const block = JSON.parse(data.toString());
       if (chain[block.index]) {
         bus.emit('invalid-block', block);
-        await this.ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
+        await ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
         return
       }
       try {
@@ -1794,7 +1213,7 @@ export default class Miner extends StoreHandler {
       } catch (error) {
         // TODO: remove publish invalid-block
         bus.emit('invalid-block', block);
-        await this.ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
+        await ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
         await this.resync(block)
         return
       }
@@ -1805,8 +1224,33 @@ export default class Miner extends StoreHandler {
   <span class="todo">
   <h4>go with previous block instead off lastBlock</h4>
   <br>
-  <p><strong>line</strong>11698</p>
-  <code>rror) {
+  <p><strong>line</strong>6324</p>
+  <code>export class DAGChain extends EventEmitter {
+  constructor({genesis, ipfs}) {
+    super();
+    this.announceBlock = this.announceBlock.bind(this);
+    this.announceTransaction = this.announceTransaction.bind(this);
+
+    this.chain = chain;
+    this.ipfs = ipfs;
+    
+    globalThis.resolveBlocks = this.resolveBlocks
+  }
+
+  async init(genesis) {
+    await this.ipfs.pubsub.subscribe('block-added', this.announceBlock);
+    await this.ipfs.pubsub.subscribe('announce-transaction', this.announceTransaction);
+    await this.ipfs.pubsub.subscribe('invalid-transaction', invalidTransaction);
+    log(`Running on the ${network} network`);
+        // TODO: finishe the genesis module
+    if (genesis) {
+      log(`Creating genesis block on the ${network} network`);
+      await this.newDAGChain();
+    }
+
+    try {
+      if (!genesis) await this.loadChain();
+    } catch (error) {
       debug(error)
       return error
     }
@@ -1828,158 +1272,13 @@ export default class Miner extends StoreHandler {
     return await this.ipfs.pin.add(multihash, {recursive: true});
   }
 
-  /**
-   * resolves to the latest chainObject
-   */
-  async sync() {
-    try {
-      const { hash } = await longestChain();
-      console.log(hash);
-      console.log('hello');
-      this.currentBlockHash = hash || await localDAGMultiaddress();
-      leofcoin.currentBlockNode = await this.get(this.currentBlockHash);
-      console.log({currentBlockNode});
-      console.log('hello');
-      leofcoin.currentBlockNode = new LFCNode(leofcoin.currentBlockNode)
-      log(`current block hash : ${this.currentBlockHash}`);
-      log(`chain size: ${Math.round(Number(leofcoin.currentBlockNode.size) * 1e-6 * 100) / 100} Mb (${leofcoin.currentBlockNode.size} bytes)`);
-      return this.currentBlockHash
-    } catch (e) {
-      throw e
-    }
-  }
-  
-  async resolveBlock(node) {
-    const prevHash = node.prevHash
-    node = await this.get(prevHash)
-    node = new LFCNode(node)
-    return node
-  }
-
-  async resolveBlocks(node, index) {
-    const cid = await util.cid(node.serialize())
-    chain[node.index] = node.toJSON();
-    chain[node.index].hash = cid.toBaseEncodedString()
-    leofcoin.hashMap.set(node.index, cid.toBaseEncodedString())
-    debug(`loaded block: ${node.index} - ${chain[node.index].hash}`);
-    if (node.prevHash !== Buffer.alloc(47).toString('hex')) {
-      // console.log((node.index - index) > 2);
-      // if ((node.index - 10) > 2) {
-      //   const arr = []
-      //   for (var i = 0; i < 2; i++) {
-      //     arr.push(leofcoin.request('blockHash', (node.index - i)))
-      //   }
-      //   console.log(arr);
-      //   const hashes = await Promise.all(arr);      
-      //   console.log(hashes);
-      //   try {
-      //     const blocks = await Promise.all(hashes.map(hash => this.get(hash)))
-      //     console.log(blocks);node = blocks.reduce((p, c) => {
-      //       if (c.index < p.index) {
-      //         if (c.index > index) debug(`added block: ${c.index}`);
-      //         return c
-      //       }
-      //       return p
-      //     })
-      //     node = new LFCNode(node)
-      //   } catch (e) {
-      //     console.error(e);
-      //   } finally {
-      // 
-      //   }
-      // } else {
-        node = await this.resolveBlock(node)
-        if (node.index > index) {
-          debug(`added block: ${node.index}`);
-        }
-      // }
-      try {
-        // store them in memory
-        // global.blockHashSet[hash] = block.index;
-        if (node.prevHash && node.prevHash !== Buffer.alloc(47).toString('hex')) {
-  
-          return this.resolveBlocks(node, index);
-        }
-        return;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return
-  }
-
   async syncChain() {
-    try {
       global.states.syncing = true;
       bus.emit('syncing', true);
-      console.log('syn');
-      await leofcoin.chain.sync();
-      console.log('sunc');
-      debug(leofcoin.currentBlockNode.toString())
-      if (leofcoin.currentBlockNode) {
-        const { index, multihash } = await this.localBlock();
-        debug(`local block index: ${index}`)
-        const height = leofcoin.currentBlockNode.index
-        let syncCount = height - index;
-        debug(`local chain height: ${index}`);
-        debug(`network chain height: ${height}`);
-        debug(`syncing ${syncCount > 0 ? syncCount : 0} block(s)`)
-        
-        
-        // whenever prevHash is undefined & syncCount is zero or lower
-        // write latest network chain to locals
-        const start = Date.now();
-        if (index > height) {
-          const value = await this.get(multihash)
-          await this.resolveBlocks(new LFCNode(value), index);
-        }
-        else await this.resolveBlocks(leofcoin.currentBlockNode, index);
-        const end = Date.now();
-        const time = end - start;
-        debug(time / 1000);
-        if (syncCount > 0) {
-          await this.updateLocals(leofcoin.currentBlockHash, height);
-        }
-      } else {
-        chain[0] = GENESISBLOCK
-        chain[0].index = 0;
-        chain[0].hash = genesisCID;
-      }
-    } catch (e) {
-      chain[0] = GENESISBLOCK
-      chain[0].index = 0;
-      chain[0].hash = genesisCID;
-      await this.updateLocals(genesisCID, 0)
-      console.error('syncChain', e);
-    }
+      await leofcoin.chain.resync()
+      bus.emit('syncing', false)
+      global.states.syncing = false;
     return;
-  }
-
-  async localBlock() {
-    try {
-      let multihash = await read(localCurrent, 'string'); // read local chain state
-      const current = await this.get(multihash);
-      const node = new LFCNode(current)
-      
-      // probably recovering local chain
-      if (node.index === undefined) {
-        index = 0;
-        debug(`invalid block detected, recovering local chain`);
-        await write(localCurrent, genesisCID);
-        return await this.localBlock();
-      } else {        
-        debug(`current local block: ${multihash}`);
-      }
-      return {
-        index: node.index,
-        multihash
-      }
-    } catch (e) {
-      console.log(e);
-      // await write(localCurrent, encode(Buffer.from(genesisCID, 'hex')));
-      await write(localCurrent, genesisCID);
-      return await this.localBlock();
-    }
   }
 
   async loadChain() {
@@ -2016,7 +1315,7 @@ export default class Miner extends StoreHandler {
         bus.emit('block-added', block);
         debug(`updating current local block: ${multihash}`)
 
-        await this.updateLocals(multihash, block.index);
+        await leofcoin.chain.updateLocals(multihash, block.index);
         try {
           debug(`pinning: ${multihash}`);
           await this.pin('/ipfs/' + multihash)
@@ -2048,22 +1347,6 @@ export default class Miner extends StoreHandler {
   }
 
   /**
-   * last resolved, mined or minted block
-   *
-   * @param {object} cid - cid instance or baseEncodedString 
-   */
-  async updateLocals(cid, index) {
-    if (cid.isCid && cid.isCid()) cid = cid.toBaseEncodedString();
-    
-    try {
-      await this.writeLocals(cid, index);
-    } catch (error) {
-      await this.writeLocals(cid, index);
-    }
-      
-  }
-
-  /**
    * Initialize a new chain on the IPFS network
    * Creates creates & saves the genesisBlock to IPFS, blocks are pinned so they aren't removeable on the local side.
    *
@@ -2074,8 +1357,8 @@ export default class Miner extends StoreHandler {
   async newDAGChain() {
     try {
       const genesisBlock = await newGenesisDAGNode(difficulty());
-      const cid = await this.ipfs.dag.put(genesisBlock, { format: 'leofcoin-block', hashAlg: util.defaultHashAlg, version: 1, multibaseName: 'base58btc', pin: true});
-      await this.updateLocals(cid.toBaseEncodedString(), 0);
+      const cid = await ipfs.dag.put(genesisBlock, { format: 'leofcoin-block', hashAlg: util.defaultHashAlg, version: 1, multibaseName: 'base58btc', pin: true});
+      await leofcoin.chain.updateLocals(cid.toBaseEncodedString(), 0);
       
       succes('genesisBlock created');
       log(`genesisBlock: ${genesisBlock.toString()}`);
@@ -2097,10 +1380,7 @@ export default class Miner extends StoreHandler {
   }
   
   async resync(block) {
-    const node = new LFCNode(block)
-    const index = chain[chain.length - 1]
-    
-    await this.resolveBlocks(node, index)
+    await leofcoin.chain.resync()
   }
 
   // TODO: go with previous block instead off lastBlock
@@ -2110,7 +1390,7 @@ export default class Miner extends StoreHandler {
       const block = JSON.parse(data.toString());
       if (chain[block.index]) {
         bus.emit('invalid-block', block);
-        await this.ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
+        await ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
         return
       }
       try {
@@ -2120,7 +1400,7 @@ export default class Miner extends StoreHandler {
       } catch (error) {
         // TODO: remove publish invalid-block
         bus.emit('invalid-block', block);
-        await this.ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
+        await ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
         await this.resync(block)
         return
       }
@@ -2131,8 +1411,33 @@ export default class Miner extends StoreHandler {
   <span class="todo">
   <h4>validate on sync ...</h4>
   <br>
-  <p><strong>line</strong>11755</p>
-  <code>rror) {
+  <p><strong>line</strong>6381</p>
+  <code>export class DAGChain extends EventEmitter {
+  constructor({genesis, ipfs}) {
+    super();
+    this.announceBlock = this.announceBlock.bind(this);
+    this.announceTransaction = this.announceTransaction.bind(this);
+
+    this.chain = chain;
+    this.ipfs = ipfs;
+    
+    globalThis.resolveBlocks = this.resolveBlocks
+  }
+
+  async init(genesis) {
+    await this.ipfs.pubsub.subscribe('block-added', this.announceBlock);
+    await this.ipfs.pubsub.subscribe('announce-transaction', this.announceTransaction);
+    await this.ipfs.pubsub.subscribe('invalid-transaction', invalidTransaction);
+    log(`Running on the ${network} network`);
+        // TODO: finishe the genesis module
+    if (genesis) {
+      log(`Creating genesis block on the ${network} network`);
+      await this.newDAGChain();
+    }
+
+    try {
+      if (!genesis) await this.loadChain();
+    } catch (error) {
       debug(error)
       return error
     }
@@ -2154,158 +1459,13 @@ export default class Miner extends StoreHandler {
     return await this.ipfs.pin.add(multihash, {recursive: true});
   }
 
-  /**
-   * resolves to the latest chainObject
-   */
-  async sync() {
-    try {
-      const { hash } = await longestChain();
-      console.log(hash);
-      console.log('hello');
-      this.currentBlockHash = hash || await localDAGMultiaddress();
-      leofcoin.currentBlockNode = await this.get(this.currentBlockHash);
-      console.log({currentBlockNode});
-      console.log('hello');
-      leofcoin.currentBlockNode = new LFCNode(leofcoin.currentBlockNode)
-      log(`current block hash : ${this.currentBlockHash}`);
-      log(`chain size: ${Math.round(Number(leofcoin.currentBlockNode.size) * 1e-6 * 100) / 100} Mb (${leofcoin.currentBlockNode.size} bytes)`);
-      return this.currentBlockHash
-    } catch (e) {
-      throw e
-    }
-  }
-  
-  async resolveBlock(node) {
-    const prevHash = node.prevHash
-    node = await this.get(prevHash)
-    node = new LFCNode(node)
-    return node
-  }
-
-  async resolveBlocks(node, index) {
-    const cid = await util.cid(node.serialize())
-    chain[node.index] = node.toJSON();
-    chain[node.index].hash = cid.toBaseEncodedString()
-    leofcoin.hashMap.set(node.index, cid.toBaseEncodedString())
-    debug(`loaded block: ${node.index} - ${chain[node.index].hash}`);
-    if (node.prevHash !== Buffer.alloc(47).toString('hex')) {
-      // console.log((node.index - index) > 2);
-      // if ((node.index - 10) > 2) {
-      //   const arr = []
-      //   for (var i = 0; i < 2; i++) {
-      //     arr.push(leofcoin.request('blockHash', (node.index - i)))
-      //   }
-      //   console.log(arr);
-      //   const hashes = await Promise.all(arr);      
-      //   console.log(hashes);
-      //   try {
-      //     const blocks = await Promise.all(hashes.map(hash => this.get(hash)))
-      //     console.log(blocks);node = blocks.reduce((p, c) => {
-      //       if (c.index < p.index) {
-      //         if (c.index > index) debug(`added block: ${c.index}`);
-      //         return c
-      //       }
-      //       return p
-      //     })
-      //     node = new LFCNode(node)
-      //   } catch (e) {
-      //     console.error(e);
-      //   } finally {
-      // 
-      //   }
-      // } else {
-        node = await this.resolveBlock(node)
-        if (node.index > index) {
-          debug(`added block: ${node.index}`);
-        }
-      // }
-      try {
-        // store them in memory
-        // global.blockHashSet[hash] = block.index;
-        if (node.prevHash && node.prevHash !== Buffer.alloc(47).toString('hex')) {
-  
-          return this.resolveBlocks(node, index);
-        }
-        return;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return
-  }
-
   async syncChain() {
-    try {
       global.states.syncing = true;
       bus.emit('syncing', true);
-      console.log('syn');
-      await leofcoin.chain.sync();
-      console.log('sunc');
-      debug(leofcoin.currentBlockNode.toString())
-      if (leofcoin.currentBlockNode) {
-        const { index, multihash } = await this.localBlock();
-        debug(`local block index: ${index}`)
-        const height = leofcoin.currentBlockNode.index
-        let syncCount = height - index;
-        debug(`local chain height: ${index}`);
-        debug(`network chain height: ${height}`);
-        debug(`syncing ${syncCount > 0 ? syncCount : 0} block(s)`)
-        
-        
-        // whenever prevHash is undefined & syncCount is zero or lower
-        // write latest network chain to locals
-        const start = Date.now();
-        if (index > height) {
-          const value = await this.get(multihash)
-          await this.resolveBlocks(new LFCNode(value), index);
-        }
-        else await this.resolveBlocks(leofcoin.currentBlockNode, index);
-        const end = Date.now();
-        const time = end - start;
-        debug(time / 1000);
-        if (syncCount > 0) {
-          await this.updateLocals(leofcoin.currentBlockHash, height);
-        }
-      } else {
-        chain[0] = GENESISBLOCK
-        chain[0].index = 0;
-        chain[0].hash = genesisCID;
-      }
-    } catch (e) {
-      chain[0] = GENESISBLOCK
-      chain[0].index = 0;
-      chain[0].hash = genesisCID;
-      await this.updateLocals(genesisCID, 0)
-      console.error('syncChain', e);
-    }
+      await leofcoin.chain.resync()
+      bus.emit('syncing', false)
+      global.states.syncing = false;
     return;
-  }
-
-  async localBlock() {
-    try {
-      let multihash = await read(localCurrent, 'string'); // read local chain state
-      const current = await this.get(multihash);
-      const node = new LFCNode(current)
-      
-      // probably recovering local chain
-      if (node.index === undefined) {
-        index = 0;
-        debug(`invalid block detected, recovering local chain`);
-        await write(localCurrent, genesisCID);
-        return await this.localBlock();
-      } else {        
-        debug(`current local block: ${multihash}`);
-      }
-      return {
-        index: node.index,
-        multihash
-      }
-    } catch (e) {
-      console.log(e);
-      // await write(localCurrent, encode(Buffer.from(genesisCID, 'hex')));
-      await write(localCurrent, genesisCID);
-      return await this.localBlock();
-    }
   }
 
   async loadChain() {
@@ -2342,7 +1502,7 @@ export default class Miner extends StoreHandler {
         bus.emit('block-added', block);
         debug(`updating current local block: ${multihash}`)
 
-        await this.updateLocals(multihash, block.index);
+        await leofcoin.chain.updateLocals(multihash, block.index);
         try {
           debug(`pinning: ${multihash}`);
           await this.pin('/ipfs/' + multihash)
@@ -2374,22 +1534,6 @@ export default class Miner extends StoreHandler {
   }
 
   /**
-   * last resolved, mined or minted block
-   *
-   * @param {object} cid - cid instance or baseEncodedString 
-   */
-  async updateLocals(cid, index) {
-    if (cid.isCid && cid.isCid()) cid = cid.toBaseEncodedString();
-    
-    try {
-      await this.writeLocals(cid, index);
-    } catch (error) {
-      await this.writeLocals(cid, index);
-    }
-      
-  }
-
-  /**
    * Initialize a new chain on the IPFS network
    * Creates creates & saves the genesisBlock to IPFS, blocks are pinned so they aren't removeable on the local side.
    *
@@ -2400,8 +1544,8 @@ export default class Miner extends StoreHandler {
   async newDAGChain() {
     try {
       const genesisBlock = await newGenesisDAGNode(difficulty());
-      const cid = await this.ipfs.dag.put(genesisBlock, { format: 'leofcoin-block', hashAlg: util.defaultHashAlg, version: 1, multibaseName: 'base58btc', pin: true});
-      await this.updateLocals(cid.toBaseEncodedString(), 0);
+      const cid = await ipfs.dag.put(genesisBlock, { format: 'leofcoin-block', hashAlg: util.defaultHashAlg, version: 1, multibaseName: 'base58btc', pin: true});
+      await leofcoin.chain.updateLocals(cid.toBaseEncodedString(), 0);
       
       succes('genesisBlock created');
       log(`genesisBlock: ${genesisBlock.toString()}`);
@@ -2423,10 +1567,7 @@ export default class Miner extends StoreHandler {
   }
   
   async resync(block) {
-    const node = new LFCNode(block)
-    const index = chain[chain.length - 1]
-    
-    await this.resolveBlocks(node, index)
+    await leofcoin.chain.resync()
   }
 
   // TODO: go with previous block instead off lastBlock
@@ -2436,7 +1577,7 @@ export default class Miner extends StoreHandler {
       const block = JSON.parse(data.toString());
       if (chain[block.index]) {
         bus.emit('invalid-block', block);
-        await this.ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
+        await ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
         return
       }
       try {
@@ -2446,7 +1587,7 @@ export default class Miner extends StoreHandler {
       } catch (error) {
         // TODO: remove publish invalid-block
         bus.emit('invalid-block', block);
-        await this.ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
+        await ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
         await this.resync(block)
         return
       }
@@ -2457,8 +1598,33 @@ export default class Miner extends StoreHandler {
   <span class="todo">
   <h4>remove publish invalid-block</h4>
   <br>
-  <p><strong>line</strong>12355</p>
-  <code>rror) {
+  <p><strong>line</strong>6976</p>
+  <code>export class DAGChain extends EventEmitter {
+  constructor({genesis, ipfs}) {
+    super();
+    this.announceBlock = this.announceBlock.bind(this);
+    this.announceTransaction = this.announceTransaction.bind(this);
+
+    this.chain = chain;
+    this.ipfs = ipfs;
+    
+    globalThis.resolveBlocks = this.resolveBlocks
+  }
+
+  async init(genesis) {
+    await this.ipfs.pubsub.subscribe('block-added', this.announceBlock);
+    await this.ipfs.pubsub.subscribe('announce-transaction', this.announceTransaction);
+    await this.ipfs.pubsub.subscribe('invalid-transaction', invalidTransaction);
+    log(`Running on the ${network} network`);
+        // TODO: finishe the genesis module
+    if (genesis) {
+      log(`Creating genesis block on the ${network} network`);
+      await this.newDAGChain();
+    }
+
+    try {
+      if (!genesis) await this.loadChain();
+    } catch (error) {
       debug(error)
       return error
     }
@@ -2480,158 +1646,13 @@ export default class Miner extends StoreHandler {
     return await this.ipfs.pin.add(multihash, {recursive: true});
   }
 
-  /**
-   * resolves to the latest chainObject
-   */
-  async sync() {
-    try {
-      const { hash } = await longestChain();
-      console.log(hash);
-      console.log('hello');
-      this.currentBlockHash = hash || await localDAGMultiaddress();
-      leofcoin.currentBlockNode = await this.get(this.currentBlockHash);
-      console.log({currentBlockNode});
-      console.log('hello');
-      leofcoin.currentBlockNode = new LFCNode(leofcoin.currentBlockNode)
-      log(`current block hash : ${this.currentBlockHash}`);
-      log(`chain size: ${Math.round(Number(leofcoin.currentBlockNode.size) * 1e-6 * 100) / 100} Mb (${leofcoin.currentBlockNode.size} bytes)`);
-      return this.currentBlockHash
-    } catch (e) {
-      throw e
-    }
-  }
-  
-  async resolveBlock(node) {
-    const prevHash = node.prevHash
-    node = await this.get(prevHash)
-    node = new LFCNode(node)
-    return node
-  }
-
-  async resolveBlocks(node, index) {
-    const cid = await util.cid(node.serialize())
-    chain[node.index] = node.toJSON();
-    chain[node.index].hash = cid.toBaseEncodedString()
-    leofcoin.hashMap.set(node.index, cid.toBaseEncodedString())
-    debug(`loaded block: ${node.index} - ${chain[node.index].hash}`);
-    if (node.prevHash !== Buffer.alloc(47).toString('hex')) {
-      // console.log((node.index - index) > 2);
-      // if ((node.index - 10) > 2) {
-      //   const arr = []
-      //   for (var i = 0; i < 2; i++) {
-      //     arr.push(leofcoin.request('blockHash', (node.index - i)))
-      //   }
-      //   console.log(arr);
-      //   const hashes = await Promise.all(arr);      
-      //   console.log(hashes);
-      //   try {
-      //     const blocks = await Promise.all(hashes.map(hash => this.get(hash)))
-      //     console.log(blocks);node = blocks.reduce((p, c) => {
-      //       if (c.index < p.index) {
-      //         if (c.index > index) debug(`added block: ${c.index}`);
-      //         return c
-      //       }
-      //       return p
-      //     })
-      //     node = new LFCNode(node)
-      //   } catch (e) {
-      //     console.error(e);
-      //   } finally {
-      // 
-      //   }
-      // } else {
-        node = await this.resolveBlock(node)
-        if (node.index > index) {
-          debug(`added block: ${node.index}`);
-        }
-      // }
-      try {
-        // store them in memory
-        // global.blockHashSet[hash] = block.index;
-        if (node.prevHash && node.prevHash !== Buffer.alloc(47).toString('hex')) {
-  
-          return this.resolveBlocks(node, index);
-        }
-        return;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return
-  }
-
   async syncChain() {
-    try {
       global.states.syncing = true;
       bus.emit('syncing', true);
-      console.log('syn');
-      await leofcoin.chain.sync();
-      console.log('sunc');
-      debug(leofcoin.currentBlockNode.toString())
-      if (leofcoin.currentBlockNode) {
-        const { index, multihash } = await this.localBlock();
-        debug(`local block index: ${index}`)
-        const height = leofcoin.currentBlockNode.index
-        let syncCount = height - index;
-        debug(`local chain height: ${index}`);
-        debug(`network chain height: ${height}`);
-        debug(`syncing ${syncCount > 0 ? syncCount : 0} block(s)`)
-        
-        
-        // whenever prevHash is undefined & syncCount is zero or lower
-        // write latest network chain to locals
-        const start = Date.now();
-        if (index > height) {
-          const value = await this.get(multihash)
-          await this.resolveBlocks(new LFCNode(value), index);
-        }
-        else await this.resolveBlocks(leofcoin.currentBlockNode, index);
-        const end = Date.now();
-        const time = end - start;
-        debug(time / 1000);
-        if (syncCount > 0) {
-          await this.updateLocals(leofcoin.currentBlockHash, height);
-        }
-      } else {
-        chain[0] = GENESISBLOCK
-        chain[0].index = 0;
-        chain[0].hash = genesisCID;
-      }
-    } catch (e) {
-      chain[0] = GENESISBLOCK
-      chain[0].index = 0;
-      chain[0].hash = genesisCID;
-      await this.updateLocals(genesisCID, 0)
-      console.error('syncChain', e);
-    }
+      await leofcoin.chain.resync()
+      bus.emit('syncing', false)
+      global.states.syncing = false;
     return;
-  }
-
-  async localBlock() {
-    try {
-      let multihash = await read(localCurrent, 'string'); // read local chain state
-      const current = await this.get(multihash);
-      const node = new LFCNode(current)
-      
-      // probably recovering local chain
-      if (node.index === undefined) {
-        index = 0;
-        debug(`invalid block detected, recovering local chain`);
-        await write(localCurrent, genesisCID);
-        return await this.localBlock();
-      } else {        
-        debug(`current local block: ${multihash}`);
-      }
-      return {
-        index: node.index,
-        multihash
-      }
-    } catch (e) {
-      console.log(e);
-      // await write(localCurrent, encode(Buffer.from(genesisCID, 'hex')));
-      await write(localCurrent, genesisCID);
-      return await this.localBlock();
-    }
   }
 
   async loadChain() {
@@ -2668,7 +1689,7 @@ export default class Miner extends StoreHandler {
         bus.emit('block-added', block);
         debug(`updating current local block: ${multihash}`)
 
-        await this.updateLocals(multihash, block.index);
+        await leofcoin.chain.updateLocals(multihash, block.index);
         try {
           debug(`pinning: ${multihash}`);
           await this.pin('/ipfs/' + multihash)
@@ -2700,22 +1721,6 @@ export default class Miner extends StoreHandler {
   }
 
   /**
-   * last resolved, mined or minted block
-   *
-   * @param {object} cid - cid instance or baseEncodedString 
-   */
-  async updateLocals(cid, index) {
-    if (cid.isCid && cid.isCid()) cid = cid.toBaseEncodedString();
-    
-    try {
-      await this.writeLocals(cid, index);
-    } catch (error) {
-      await this.writeLocals(cid, index);
-    }
-      
-  }
-
-  /**
    * Initialize a new chain on the IPFS network
    * Creates creates & saves the genesisBlock to IPFS, blocks are pinned so they aren't removeable on the local side.
    *
@@ -2726,8 +1731,8 @@ export default class Miner extends StoreHandler {
   async newDAGChain() {
     try {
       const genesisBlock = await newGenesisDAGNode(difficulty());
-      const cid = await this.ipfs.dag.put(genesisBlock, { format: 'leofcoin-block', hashAlg: util.defaultHashAlg, version: 1, multibaseName: 'base58btc', pin: true});
-      await this.updateLocals(cid.toBaseEncodedString(), 0);
+      const cid = await ipfs.dag.put(genesisBlock, { format: 'leofcoin-block', hashAlg: util.defaultHashAlg, version: 1, multibaseName: 'base58btc', pin: true});
+      await leofcoin.chain.updateLocals(cid.toBaseEncodedString(), 0);
       
       succes('genesisBlock created');
       log(`genesisBlock: ${genesisBlock.toString()}`);
@@ -2749,10 +1754,7 @@ export default class Miner extends StoreHandler {
   }
   
   async resync(block) {
-    const node = new LFCNode(block)
-    const index = chain[chain.length - 1]
-    
-    await this.resolveBlocks(node, index)
+    await leofcoin.chain.resync()
   }
 
   // TODO: go with previous block instead off lastBlock
@@ -2762,7 +1764,7 @@ export default class Miner extends StoreHandler {
       const block = JSON.parse(data.toString());
       if (chain[block.index]) {
         bus.emit('invalid-block', block);
-        await this.ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
+        await ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
         return
       }
       try {
@@ -2772,7 +1774,7 @@ export default class Miner extends StoreHandler {
       } catch (error) {
         // TODO: remove publish invalid-block
         bus.emit('invalid-block', block);
-        await this.ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
+        await ipfs.pubsub.publish('invalid-block', Buffer.from(JSON.stringify(block)));
         await this.resync(block)
         return
       }
@@ -3115,13 +2117,10 @@ export default define(class MinerSection extends RenderMixin(HTMLElement) {
   </span>
 
  
-<h3>D:\Workspace-laptop\leofcoin\leofcoin\src\www\sections\explorer\explorer-block.js</h3>
-
- 
 <h3>D:\Workspace-laptop\leofcoin\leofcoin\src\www\sections\explorer\explorer.js</h3>
 
  
-<h3>D:\Workspace-laptop\leofcoin\leofcoin\node_modules\custom-svg-iconset\custom-svg-iconset.js</h3>
+<h3>D:\Workspace-laptop\leofcoin\leofcoin\src\www\sections\explorer\explorer-block.js</h3>
 
  
 <h3>D:\Workspace-laptop\leofcoin\leofcoin\node_modules\custom-renderer-mixin\src\render-mixin.js</h3>
@@ -3593,6 +2592,9 @@ export default base => {
 
  
 <h3>D:\Workspace-laptop\leofcoin\leofcoin\node_modules\custom-svg-icon\custom-svg-icon.js</h3>
+
+ 
+<h3>D:\Workspace-laptop\leofcoin\leofcoin\node_modules\custom-svg-iconset\custom-svg-iconset.js</h3>
 
  
 <h3>D:\Workspace-laptop\leofcoin\leofcoin\src\www\sections\wallet\wallet-loader.js</h3>
@@ -4333,22 +3335,6 @@ export default define(class ExplorerBlockView extends RenderMixin(PropertyMixin(
   </span>
 
  
-<h3>D:\Workspace-laptop\leofcoin\leofcoin\node_modules\backed\src\utils\merge.js</h3>
-
- 
-<h3>D:\Workspace-laptop\leofcoin\leofcoin\node_modules\backed\src\mixins\property-mixin.js</h3>
-
-  <span class="todo">
-  <h4>Create & add global observer</h4>
-  <br>
-  <p><strong>line</strong>169</p>
-  <code></code>
-  </span>
-
- 
-<h3>D:\Workspace-laptop\leofcoin\leofcoin\node_modules\custom-select-mixins\src\selector-mixin.js</h3>
-
- 
 <h3>D:\Workspace-laptop\leofcoin\leofcoin\node_modules\custom-html-tag\src\html.js</h3>
 
  
@@ -4489,6 +3475,22 @@ export default base => {
 }
 </code>
   </span>
+
+ 
+<h3>D:\Workspace-laptop\leofcoin\leofcoin\node_modules\backed\src\utils\merge.js</h3>
+
+ 
+<h3>D:\Workspace-laptop\leofcoin\leofcoin\node_modules\backed\src\mixins\property-mixin.js</h3>
+
+  <span class="todo">
+  <h4>Create & add global observer</h4>
+  <br>
+  <p><strong>line</strong>169</p>
+  <code></code>
+  </span>
+
+ 
+<h3>D:\Workspace-laptop\leofcoin\leofcoin\node_modules\custom-select-mixins\src\selector-mixin.js</h3>
 
  
 <h3>D:\Workspace-laptop\leofcoin\leofcoin\src\www\api.js</h3>

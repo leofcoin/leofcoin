@@ -1,0 +1,27 @@
+{
+  "name": "peernet",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "c": "rollup -c",
+    "b": "browserify p2p-browser.js -o p2p-browser.js --standalone p2p",
+    "test": "node p2p.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discovery-swarm": "^6.1.0",
+    "discovery-swarm-web": "^2.0.0",
+    "get-port": "^5.1.1",
+    "peerjs": "^1.2.0",
+    "public-ip": "^4.0.1",
+    "socket-request-client": "^1.4.3",
+    "socket-request-server": "^1.0.0"
+  },
+  "devDependencies": {
+    "browserify": "^16.5.1",
+    "rollup": "^2.6.0"
+  }
+}
