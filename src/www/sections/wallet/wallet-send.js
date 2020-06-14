@@ -65,12 +65,12 @@ export default define(class WalletSend extends PropertyMixin(RenderMixin(CSSMixi
   }
 
   async send() {
-    await state('ready', true);
+    await leofcoin.api.state('ready', true);
     if (this.paywith && this.payto && this.amount) {
       // TODO: push result to mempool
       try {
         const result = await this.validate(this.paywith[0], this.payto, this.amount)
-        const sended = await send({
+        const sended = await leofcoin.api.send({
           to: this.payto,
           from: this.paywith,
           amount: this.amount,
@@ -84,7 +84,7 @@ export default define(class WalletSend extends PropertyMixin(RenderMixin(CSSMixi
         const permission = await Notification.requestPermission();
         if (permission === "granted") {
 
-          new Notification(`${hash} signed & added to pool`, {icon: '/assets/leofcoin_96.png', badge: '/assets/leofcoin_96.png'}).onclick = (ev) => {
+          new Notification(`${hash} signed & added to pool`, {icon: './assets/leofcoin_96.png', badge: './assets/leofcoin_96.png'}).onclick = (ev) => {
             ev.preventDefault();
             console.log(ev)
           }

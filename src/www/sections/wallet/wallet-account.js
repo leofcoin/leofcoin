@@ -16,7 +16,7 @@ export default define(class walletAccount extends CSSMixin(RenderMixin(HTMLEleme
   set account(value) {
     this.index = value[0];
     this.setAttribute('data-route', this.index)
-    this.name = accountNames[this.index];
+    this.name = leofcoin.api.accountNames[this.index];
     if (!this.name) this.name = value[1]
     this.address = value[2][0];
     console.log(value);
@@ -33,7 +33,7 @@ export default define(class walletAccount extends CSSMixin(RenderMixin(HTMLEleme
   }
 
   async updateBalance() {
-    await state('ready', true);
+    await leofcoin.api.state('ready', true);
     this.walletAddressBalance.address = this.address;
     // this.balance = await balance(this.address);
     // this.balance = String(this.balance);

@@ -1,0 +1,1 @@
+"use strict";function _interopDefault(e){return e&&"object"==typeof e&&"default"in e?e.default:e}var rpc=require("carlo/rpc"),EventEmitter=_interopDefault(require("events"));class Emitter extends EventEmitter{constructor(){super()}on(e,t){super.on(e,t)}emit(e,t){super.emit(e,t)}}rpc.rpc_process.init(()=>rpc.rpc.handle(new Emitter));

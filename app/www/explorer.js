@@ -1,6 +1,6 @@
-import { define, RenderMixin, CSSMixin } from './../../shared-imports.js';
+import { d as define, b as RenderMixin, c as CSSMixin } from './chunk-30a2cd27.js';
 
-export default define(class ExplorerSection extends RenderMixin(CSSMixin(HTMLElement)) {
+var explorer = define(class ExplorerSection extends RenderMixin(CSSMixin(HTMLElement)) {
   get pages() {
     return this.shadowRoot.querySelector('custom-pages')
   }
@@ -11,7 +11,7 @@ export default define(class ExplorerSection extends RenderMixin(CSSMixin(HTMLEle
     return this.shadowRoot.querySelector('explorer-block-view')
   }
   constructor() {
-    super()
+    super();
     this.attachShadow({mode: 'open'});
 
     this._onBlockAdded = this._onBlockAdded.bind(this);
@@ -24,10 +24,10 @@ export default define(class ExplorerSection extends RenderMixin(CSSMixin(HTMLEle
     document.addEventListener('show-block', this._onShowBlock);
     this.navBar.select('summary');
     (async () => {
-      await import('./explorer-dashboard.js');
-      await import('./explorer-block-view.js');
+      await import("./explorer-dashboard.js");
+      await import("./explorer-block-view.js");
 
-    })()
+    })();
     // document.addEventListener('hashrate', hashrateChange);
     // document.addEventListener('job-cancelled', jobCancelled);
   }
@@ -41,9 +41,9 @@ export default define(class ExplorerSection extends RenderMixin(CSSMixin(HTMLEle
     if (detail === 'close') {
 
       console.log(this.pages._assignedNodes[this.pages._assignedNodes.indexOf(this.pages.currentSelected) + - 1]);
-      this.pages.previous()
+      this.pages.previous();
       this.navBar.setAttribute('items', JSON.stringify(["summary:summary", "transactions:transactions"]));
-      this.navBar.select(this.pages.selected.getAttribute('data-route'))
+      this.navBar.select(this.pages.selected.getAttribute('data-route'));
     } else {
       this.pages.select(detail);
     }
@@ -51,9 +51,9 @@ export default define(class ExplorerSection extends RenderMixin(CSSMixin(HTMLEle
   }
 
   async _onShowBlock({detail}) {
-    const next = await leofcoin.api.block((detail.index + 1))
+    const next = await leofcoin.api.block((detail.index + 1));
     this.navBar.setAttribute('items', JSON.stringify(['close:close']));
-    this.pages.select(this.blockExplorer)
+    this.pages.select(this.blockExplorer);
     this.blockExplorer.stamp(detail, next);
   }
 
@@ -121,3 +121,5 @@ export default define(class ExplorerSection extends RenderMixin(CSSMixin(HTMLEle
   }
 
 });
+
+export default explorer;

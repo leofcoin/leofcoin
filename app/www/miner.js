@@ -1,8 +1,55 @@
-import { define, RenderMixin, CSSMixin } from './../../shared-imports.js';
-import './miner-hashrate.js';
-import './../../extended-fab.js';
+import './chunk-b455c5f0.js';
+import { d as define, b as RenderMixin, c as CSSMixin } from './chunk-30a2cd27.js';
 
-export default define(class MinerSection extends RenderMixin(HTMLElement) {
+define(class MinerHashrate extends RenderMixin(CSSMixin(HTMLElement)) {
+  constructor() {
+    super();
+    this.attachShadow({mode: 'open'});
+  }
+
+  updateRate(uid, rate) {
+    console.log(uid);
+    let hashEl = this.querySelector(`[data-uid="${uid}"]`);
+    if (!hashEl) {
+      hashEl = document.createElement('span');
+      hashEl.dataset.uid = uid;
+      this.appendChild(hashEl);
+    }
+    hashEl.innerHTML = `${rate} kH/s`;
+    hashEl.dataset.rate = rate;
+    const nodes = this.shadowRoot.querySelector('slot').assignedElements();
+    const hashrate = nodes.reduce((p, c) => p + Number(c.dataset.rate), 0);
+    this.render({ hashrate: `${Math.round(hashrate * 100) / 100} kH/s`, intensity: nodes.length });
+  }
+
+  get template() {
+    return html`
+      <style>
+        :host {
+          display: flex;
+          flex-direction: column;
+          min-width: 200px;
+        }
+        apply(--css-column)
+        apply(--css-row)
+        apply(--css-flex)
+        .dropdown {
+          display: none;
+        }
+      </style>
+      <span class="row">
+        <span>${'hashrate'}</span>
+        <span class="flex"></span>
+        <span title="intensity (cpu cores)">${'intensity'}</span>
+      </span>
+      <span class="dropdown column">
+        <slot></slot>
+      </span>
+    `;
+  }
+});
+
+var miner = define(class MinerSection extends RenderMixin(HTMLElement) {
 
   get hashrate () {
     return this.shadowRoot.querySelector('miner-hashrate');
@@ -14,7 +61,7 @@ export default define(class MinerSection extends RenderMixin(HTMLElement) {
     return this.shadowRoot.querySelector('.intensity');
   }
   get afterIntensity () {
-    if (!this._afterIntensity) this._afterIntensity = this.intensity.parentNode.insertBefore(document.createElement('span'), this.intensity)
+    if (!this._afterIntensity) this._afterIntensity = this.intensity.parentNode.insertBefore(document.createElement('span'), this.intensity);
     return this._afterIntensity;
   }
   get mineButton () {
@@ -38,7 +85,7 @@ export default define(class MinerSection extends RenderMixin(HTMLElement) {
   }
 
   constructor() {
-    super()
+    super();
     this.attachShadow({mode: 'open'});
 
     this.hashrateChange = this.hashrateChange.bind(this);
@@ -57,7 +104,7 @@ export default define(class MinerSection extends RenderMixin(HTMLElement) {
   connectedCallback() {
     super.connectedCallback();
     (async () => {
-      this.cores = await leofcoin.api.cores
+      this.cores = await leofcoin.api.cores;
       this.config = await leofcoin.api.getMinerConfig();
       this.mining = await leofcoin.api.state('mining');
       this.address.value = this.config.address;
@@ -68,24 +115,24 @@ export default define(class MinerSection extends RenderMixin(HTMLElement) {
       this.intensity.addEventListener('change', async event => {
         this.config.intensity = this.intensity.value;
         // this.afterIntensity.innerHTML = this.intensity.value;
-        await leofcoin.api.setMinerConfig(this.config)
+        await leofcoin.api.setMinerConfig(this.config);
         if (this.hasAttribute('mining')) leofcoin.api.mine(this.config);
       });
 
       this.address.addEventListener('change', async event => {
         this.config.address = this.address.value;
-        await leofcoin.api.setMinerConfig(this.config)
+        await leofcoin.api.setMinerConfig(this.config);
         if (this.hasAttribute('mining')) leofcoin.api.mine(this.config);
       });
 
       this.mineButton.addEventListener('click', this.mine);
-    })()
+    })();
     // document.addEventListener('hashrate', hashrateChange);
     // document.addEventListener('job-cancelled', jobCancelled);
   }
 
   newHashrateElement(uid) {
-    const el = document.createElement('span')
+    const el = document.createElement('span');
     el.setAttribute('uid', uid);
     this.hashrate.appendChild(el);
     return el;
@@ -103,12 +150,12 @@ export default define(class MinerSection extends RenderMixin(HTMLElement) {
     //   hashEl = this.newHashrateElement(uid)
     // }
     // hashEl.innerHTML = `${hashrate} kH/s`;
-    this.hashrate.updateRate(uid, hashrate)
+    this.hashrate.updateRate(uid, hashrate);
     // totalHashrate.innerHTML = this.hasHashrate.children.reduce((p, c) => {}, 0)
   }
 
   jobCancelled(uid) {
-    const el = this.shadowRoot.querySelector(`[uid="${uid}"]`)
+    const el = this.shadowRoot.querySelector(`[uid="${uid}"]`);
     if (el) this.hashrate.removeChild(el);
   }
 
@@ -204,3 +251,5 @@ export default define(class MinerSection extends RenderMixin(HTMLElement) {
   }
 
 });
+
+export default miner;

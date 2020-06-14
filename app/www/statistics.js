@@ -1,11 +1,11 @@
-import { define, RenderMixin, CSSMixin } from './../shared-imports.js';
-import './../extended-fab.js';
+import './chunk-b455c5f0.js';
+import { d as define, b as RenderMixin, c as CSSMixin } from './chunk-30a2cd27.js';
 
-export default define(class StatisticsSection extends RenderMixin(HTMLElement) {
+var statistics = define(class StatisticsSection extends RenderMixin(HTMLElement) {
 
   set peerCount(value) {
-    this._peerCount = value
-    this.render({peerCount: value})
+    this._peerCount = value;
+    this.render({peerCount: value});
   }
   
   get peerCount() {
@@ -27,12 +27,12 @@ export default define(class StatisticsSection extends RenderMixin(HTMLElement) {
       console.log({discover});
     });
     (async () => {
-      const _peers = await leofcoi.api.peers()
-      this.peerCount = _peers.length
+      const _peers = await leofcoi.api.peers();
+      this.peerCount = _peers.length;
     })();
     setInterval(async () => {
-      const _peers = await peers()
-      this.peerCount = _peers.length
+      const _peers = await peers();
+      this.peerCount = _peers.length;
     }, 60000);
   }
 
@@ -60,3 +60,5 @@ export default define(class StatisticsSection extends RenderMixin(HTMLElement) {
     `
   }
 });
+
+export default statistics;

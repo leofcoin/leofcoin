@@ -49,16 +49,9 @@ export default define(class SplashScreen extends RenderMixin(HTMLElement) {
         title: 'loading',
         splash: this.connectingAnimation
       })
-      this.ready = await state('ready')
+      this.ready = await leofcoin.api.state('ready')
       if (this.ready) return;
-      this.connecting = await state('connecting', 'event');
-      if (!this.connecting) {
-        this.ready = await state('ready', true)
-        return;
-      }
-      this.syncing = await state('syncing', true);
-      this.syncing = true;
-      this.ready = await state('ready', true);
+      this.ready = await leofcoin.api.state('ready', true);
     })()
   }
   get connectingAnimation() {

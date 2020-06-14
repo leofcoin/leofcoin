@@ -61,7 +61,7 @@ export default define(class leofcoinShell extends CSSMixin(RenderMixin(HTMLEleme
     for (const address of window.store.addresses) {
       const _transactions = []
       for (const {multihash} of block.transactions) {
-        const tx = await transaction(multihash)
+        const tx = await leofcoin.transaction.get(multihash)
         _transactions.push(tx)
       }
       for (const {inputs, outputs, reward} of _transactions) {
@@ -201,6 +201,7 @@ export default define(class leofcoinShell extends CSSMixin(RenderMixin(HTMLEleme
         <miner-section data-route="miner" class="hero"></miner-section>
         <explorer-section data-route="explorer"></explorer-section>
         <statistics-section data-route="statistics"></statistics-section>
+        <settings-section data-route="settings"></settings-section>
       </custom-pages>
 
       <span class="no-toast main"></span>

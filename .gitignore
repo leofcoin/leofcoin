@@ -5,3 +5,5 @@ build/executables/*
 build/win/*.iss
 /ipfs.exe
 /leofcoin.js
+
+/out

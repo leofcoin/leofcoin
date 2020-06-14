@@ -2,7 +2,7 @@ import { define, merge, RenderMixin, CSSMixin } from './../../shared-imports.js'
 
 // TODO: dynamic imports ...
 import loadWallet from './wallet-loader';
-// import api from '../../api';
+// import leofcoin.api from '../../leofcoin.api';
 import './wallet-accounts';
 import './wallet-transactions';
 import './wallet-name-input';
@@ -42,9 +42,9 @@ export default define(class WalletSection extends RenderMixin(CSSMixin(HTMLEleme
       try {
         // TODO: await addresses() --> accounts()
         console.log('a');
-        console.log(await addresses());
+        console.log(await leofcoin.api.addresses());
         console.log('z');
-        this.accounts = await addresses();
+        this.accounts = await leofcoin.api.addresses();
         if (this.accounts) {
           this._extendedFab.label = 'create account';
           this._extendedFab.onclick = () => this.createAccount();
@@ -88,7 +88,7 @@ export default define(class WalletSection extends RenderMixin(CSSMixin(HTMLEleme
   async createAccount() {
     const nameInput = document.createElement('wallet-name-input');
     nameInput.addEventListener('name-change', async ({detail}) => {
-      createAccount();
+      leofcoin.api.createAccount();
       // const response = await fetch(`http://localhost:5005/core/new-address?name=${detail}`);
       // const address = await response.json()
       this.add(address);
@@ -101,10 +101,10 @@ export default define(class WalletSection extends RenderMixin(CSSMixin(HTMLEleme
 
   async createWallet() {
     console.log('w');
-    const result = await createWallet();
+    const result = await leofcoin.api.createWallet();
     console.log(result.mnemonic);
     alert(`Wallet generated\nplease note mnemonic down\nnote, losing results in an unrecoverable wallet\n\n${result.mnemonic}`)
-    this.accounts = await accounts();
+    this.accounts = await leofcoin.api.accounts();
     this.setAccounts();
   }
 

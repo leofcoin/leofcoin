@@ -1,8 +1,9 @@
-import { define, RenderMixin, CSSMixin } from './../../shared-imports.js';
-export default define(class ExplorerBlock extends RenderMixin(CSSMixin(HTMLElement)) {
+import { d as define, b as RenderMixin, c as CSSMixin } from './chunk-30a2cd27.js';
+
+var explorerBlock = define(class ExplorerBlock extends RenderMixin(CSSMixin(HTMLElement)) {
 
   constructor() {
-    super()
+    super();
     this.attachShadow({mode: 'open'});
   }
 
@@ -15,21 +16,21 @@ export default define(class ExplorerBlock extends RenderMixin(CSSMixin(HTMLEleme
     let minutes;
     let seconds;
     let string = '<custom-svg-icon icon="clock"></custom-svg-icon>';
-    const current = new Date().getTime()
+    const current = new Date().getTime();
     const age = ((current / 1000) - value) / 86400; // 24 hours
-    let days = String(age).split('.')
+    let days = String(age).split('.');
     if (days && days[1]) {
       hours = String(Number(`0.${days[1]}`) * 24).split('.');
       days = days[0];
     }
     if (hours && hours[1]) {
-      minutes = String(Number(`0.${hours[1]}`) * 60).split('.')
+      minutes = String(Number(`0.${hours[1]}`) * 60).split('.');
       hours = hours[0];
     }
     if (minutes && minutes[1]) {
       seconds = String(Number(`0.${minutes[1]}`) * 60).split('.');
       minutes = minutes[0];
-      if (seconds[1]) seconds = seconds[0]
+      if (seconds[1]) seconds = seconds[0];
     }
     if (Number(days) > 0) string += `<span class="time">${days}</span><strong>days</strong>`;
     if (Number(days) > 0 && Number(hours) > 0) string += `<span class="time">${hours}</span><strong>hours</strong>`;
@@ -68,17 +69,17 @@ export default define(class ExplorerBlock extends RenderMixin(CSSMixin(HTMLEleme
     value.transactions.forEach(async tx => {
       console.log(tx);
       if (tx.multihash) {
-        tx = await leofcoin.transaction.get(tx.multihash)
+        tx = await leofcoin.transaction.get(tx.multihash);
         console.log(tx);
       }
       tx.outputs.forEach(o => amount += o.amount);
       tx.inputs.forEach(i => amount += i.amount);
       if (tx.reward) this.address = tx.outputs[0].address;
-      this.observer()
+      this.observer();
     });
     this.amount = amount;
     this._data = value;
-    this.observer()
+    this.observer();
   }
 
   get data() {
@@ -94,7 +95,7 @@ export default define(class ExplorerBlock extends RenderMixin(CSSMixin(HTMLEleme
         age: this.age,
         address: this.address,
         amount: this.amount
-      })
+      });
     }
   }
 
@@ -195,3 +196,5 @@ export default define(class ExplorerBlock extends RenderMixin(CSSMixin(HTMLEleme
   }
 
 });
+
+export default explorerBlock;

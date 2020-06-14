@@ -1,8 +1,9 @@
-import { define, RenderMixin, CSSMixin } from './../../shared-imports.js';
-export default define(class ExplorerTransaction extends RenderMixin(CSSMixin(HTMLElement)) {
+import { d as define, b as RenderMixin, c as CSSMixin } from './chunk-30a2cd27.js';
+
+var explorerTransaction = define(class ExplorerTransaction extends RenderMixin(CSSMixin(HTMLElement)) {
 
   constructor() {
-    super()
+    super();
     this.attachShadow({mode: 'open'});
   }
 
@@ -25,7 +26,7 @@ export default define(class ExplorerTransaction extends RenderMixin(CSSMixin(HTM
     this.reward = value.reward;
     this.txCount = value.transactions.length;
     this.height = value.index;
-    this.observer()
+    this.observer();
   }
 
   get block() {
@@ -38,21 +39,21 @@ export default define(class ExplorerTransaction extends RenderMixin(CSSMixin(HTM
       id: this.id,
       reward: this.reward,
       amount: this.amount
-    })
+    });
   }
 
   set data(value) {
     (async () => {
       if (value.multihash) {
-        value = await leofcoin.transaction.get(value.multihash)
+        value = await leofcoin.transaction.get(value.multihash);
       }
         console.log({value});
       this.time = value.time;
       this.id = value.id;
       this.reward = value.reward;
-      this.amount = value.outputs.reduce((p, c) => p + c.amount, 0)
-      this.observer()
-    })()
+      this.amount = value.outputs.reduce((p, c) => p + c.amount, 0);
+      this.observer();
+    })();
   }
 
 
@@ -99,3 +100,5 @@ export default define(class ExplorerTransaction extends RenderMixin(CSSMixin(HTM
   }
 
 });
+
+export default explorerTransaction;

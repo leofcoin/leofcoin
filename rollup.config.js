@@ -7,13 +7,36 @@ import modify from 'rollup-plugin-modify';
 import { spawn } from 'child_process';
 import del from 'del';
 
-del.sync('www/chunk-*')
-del.sync('chunk-*')
+del.sync('app/www/chunk-*')
+del.sync('app/chunk-*')
+spawn('cp', ['node_modules/@leofcoin/core/dist/commonjs/miner-worker.js', 'app/www/miner-worker.js'])
 // spawn('cp', ['node_modules/rpc-bus/dist/index.js', 'www/rpc-bus.js'])
-export default [{
-  input: ['src/leofcoin.js', 'src/bus.js'],
+export default [
+  {
+    input: 'src/renderer.js',
+    output: {
+      file: './app/www/renderer.js',
+      format: 'cjs'
+    },
+    plugins: [
+      json()
+    ]
+  },
+  {
+    input: 'src/gui.js',
+    output: {
+      file: './app/gui.js',
+      format: 'cjs'
+    },
+    plugins: [
+      cjs()
+    ]
+  },
+  {
+  
+  input: ['src/bus.js'],
   output: {
-    dir: './',
+    dir: './app',
     format: 'cjs',
     intro: 'let LeofcoinStorage;\nlet QRCode;\nlet Ipfs;'
   },
@@ -39,14 +62,16 @@ export default [{
   ]
 }, {
   input: ['src/www/leofcoin-shell.js', 'src/www/sections/wallet/wallet.js',
-          'src/www/sections/miner/miner.js', 'src/www/sections/explorer/explorer.js',
+          'src/www/sections/miner/miner.js',
+          'src/www/sections/explorer/explorer.js',
+          'src/www/sections/settings/settings.js',
           'src/www/sections/explorer/explorer-block.js',
           'src/www/sections/explorer/explorer-transaction.js',
           'src/www/sections/statistics.js',
           'src/www/iconset.js', 'src/www/splash-screen.js'
           ],
   output: {
-    dir: 'www',
+    dir: './app/www',
     format: 'es'
   },
 	experimentalCodeSplitting: true,

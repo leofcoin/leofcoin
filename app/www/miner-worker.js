@@ -1,7 +1,7 @@
-/* @leofcoin/core version 0.5.3 */
+/* @leofcoin/core version 0.5.2 */
 'use strict';
 
-const ENVIRONMENT = {version: '0.5.3', production: true};
+const ENVIRONMENT = {version: '0.5.2', production: true};
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
@@ -10,7 +10,7 @@ var CID = _interopDefault(require('cids'));
 
 var hashFromMultihash = multihash => {
   const cid = new CID(multihash.replace('/ipfs/', ''));
-  return cid.multihash.slice(cid.prefix.length / 2).toString('hex')
+  return cid.multihash.slice(cid.prefix.length - 3).toString('hex')
 };
 
 const { LFCNode, util } = ipldLfc;

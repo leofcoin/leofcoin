@@ -1,1 +1,1 @@
-{"assets":["www","node_modules/ipfs/node_modules/leveldown/**/*","node_modules/lfc-storage/**/*"],"output":"build/executables/mac","targets":["node12-macos-x64","node12-macos-x86"],"entry":"leofcoin.js"}
+{"assets":["www","node_modules/ipfs/node_modules/leveldown/**/*","node_modules/lfc-storage/**/*"],"output":"build/executables","targets":["node12-win-x64","node12-win-x86"],"entry":"leofcoin.js"}

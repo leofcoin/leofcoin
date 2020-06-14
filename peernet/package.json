@@ -17,7 +17,7 @@
     "get-port": "^5.1.1",
     "peerjs": "^1.2.0",
     "public-ip": "^4.0.1",
-    "socket-request-client": "^1.4.3",
+    "socket-request-client": "^1.4.2",
     "socket-request-server": "^1.0.0"
   },
   "devDependencies": {

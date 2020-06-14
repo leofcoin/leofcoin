@@ -23,7 +23,7 @@ export default define(class ExplorerListView extends RenderMixin(SelectorMixin(H
     this.attachShadow({mode: 'open'});
 
     this._onBlockAdded = this._onBlockAdded.bind(this);
-    bus.on('block.added', rpc.handle(this._onBlockAdded));
+    bus.on('block.added', this._onBlockAdded);
   }
 
   connectedCallback() {
@@ -33,9 +33,10 @@ export default define(class ExplorerListView extends RenderMixin(SelectorMixin(H
     (async () => {
       await import(`./explorer-${this.type}.js`);
 
-      if (this.type === 'block') this.items = await blocks(Number(this.last), true);
-      if (this.type === 'transaction') this.items = await transactions(Number(this.last), true);
+      if (this.type === 'block') this.items = await leofcoin.api.blocks(Number(this.last), true);
+      if (this.type === 'transaction') this.items = await leofcoin.api.transactions(Number(this.last), true);
       console.log(this.items);
+      
       for (var i = 0; i < this.items.length; i++) {
         const el = document.createElement(`explorer-${this.type}`);
         this.appendChild(el);
@@ -46,8 +47,17 @@ export default define(class ExplorerListView extends RenderMixin(SelectorMixin(H
     // document.addEventListener('job-cancelled', jobCancelled);
   }
 
-  _onBlockAdded() {
+  async _onBlockAdded() {
+    this.innerHTML = ''
+    if (this.type === 'block') this.items = await leofcoin.api.blocks(Number(this.last), true);
+    if (this.type === 'transaction') this.items = await leofcoin.api.transactions(Number(this.last), true);
+    console.log(this.items);
 
+    for (var i = 0; i < this.items.length; i++) {
+      const el = document.createElement(`explorer-${this.type}`);
+      this.appendChild(el);
+      el.data = this.items[i];
+    }
   }
 
   _updateSelected() {

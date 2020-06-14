@@ -7,6 +7,7 @@ let Ipfs;
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var EventEmitter = _interopDefault(require('events'));
+var rpc = require('carlo/rpc');
 
 class Emitter extends EventEmitter {
 	constructor() {
@@ -21,4 +22,4 @@ class Emitter extends EventEmitter {
 }
 var bus = new Emitter();
 
-exports.bus = bus;
+rpc.rpc_process.init(() => rpc.rpc.handle(bus));

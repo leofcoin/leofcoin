@@ -8,7 +8,7 @@ export default define(class walletAccounts extends RenderMixin(CSSMixin(CustomSe
     this.attachShadow({mode: 'open'})
     this.selected = 0;
     this._onBlockAdded = this._onBlockAdded.bind(this);
-    bus.on('block-added', rpc.handle(this._onBlockAdded));
+    bus.on('block-added', this._onBlockAdded);
   }
 
   _onBlockAdded() {

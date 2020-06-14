@@ -5,8 +5,19 @@
   </head>
   <script>
     const run = async () => {
-      const [app, bus] = await carlo.loadParams();
-      window.bus = bus;
+      globalThis.exports = {}
+      globalThis.states = {
+        ready: false,
+        syncing: false,
+        connecting: false,
+        mining: false
+      };
+      const {api, core} = require('./renderer.js')
+      console.log(api);
+      globalThis.leofcoin = globalThis.leofcoin || {}
+      globalThis.leofcoin.api = api
+      // const [app, bus] = await carlo.loadParams();
+      // window.bus = bus;
       const script = (src, onload, type) => {
         if (typeof onload === 'string') {
           type = onload;
@@ -18,12 +29,19 @@
         script.src = src;
         document.head.appendChild(script);
       }
+      
       script('./iconset.js', () => {
-        script('./splash-screen.js', 'module')
-        script('./leofcoin-shell.js', () => {
-          const shell = document.querySelector('leofcoin-shell')
-          bus.on('block-added', rpc.handle(shell._onBlockAdded));
+        script('./splash-screen.js', async () => {
+          await core({network: 'leofcoin'})
+          script('./leofcoin-shell.js', async () => {
+            const shell = document.querySelector('leofcoin-shell')
+            
+            // const core = require('./core.js');
+            
+            bus.on('block-added', shell._onBlockAdded);
+          }, 'module')
         }, 'module')
+        
       }, 'module')
     }
   </script>

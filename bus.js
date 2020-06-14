@@ -4,7 +4,7 @@ let LeofcoinStorage;
 let QRCode;
 let Ipfs;
 
-var __chunk_1 = require('./chunk-fe199f6b.js');
+var __chunk_1 = require('./chunk-8c482a3a.js');
 var rpc = require('carlo/rpc');
 require('events');
 

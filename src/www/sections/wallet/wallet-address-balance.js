@@ -7,8 +7,8 @@ export default define(class WalletAddressBalance extends HTMLElement {
     this._address = value;
     (async () => {
       const index = this.getAttribute('chain-index');
-      if (index) this.balance = await balanceAfter(this.address, index);
-      else this.balance = await balance(this.address);
+      if (index) this.balance = await leofcoin.api.balanceAfter(this.address, index);
+      else this.balance = await leofcoin.api.balance(this.address);
     })()
   }
 
@@ -21,8 +21,9 @@ export default define(class WalletAddressBalance extends HTMLElement {
     (async () => {
       this.innerHTML = String(value);
 
-      const block = await block();
-      this.setAttribute('chain-index', block[0].index);
+      const block = await leofcoin.api.block();
+      console.log(block);
+      this.setAttribute('chain-index', block.index);
     })()
   }
 
